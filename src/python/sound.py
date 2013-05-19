@@ -36,7 +36,7 @@ class WavFile():
             nsound = ((self.data / np.abs(self.data).max())*max_amplitude).astype('int')
         else:
             nsound = self.data
-        print 'nsound.min=%d, max=%d' % (nsound.min(), nsound.max())
+        #print 'nsound.min=%d, max=%d' % (nsound.min(), nsound.max())
         hex_sound = [struct.pack('h', x) for x in nsound]
         wf.writeframes(''.join(hex_sound))
         wf.close()
@@ -105,7 +105,7 @@ def gaussian_stft(s, sample_rate, window_length, increment, nstd=6, min_freq=0, 
 
     nincrement = int(sample_rate*increment)
     nwindows = len(s) / nincrement
-    print 'len(s)=%d, nwinlen=%d, hwinlen=%d, nincrement=%d, nwindows=%d' % (len(s), nwinlen, hnwinlen, nincrement, nwindows)
+    #print 'len(s)=%d, nwinlen=%d, hwinlen=%d, nincrement=%d, nwindows=%d' % (len(s), nwinlen, hnwinlen, nincrement, nwindows)
 
     #construct the window
     gauss_t = np.arange(-hnwinlen, hnwinlen, 1.0)
