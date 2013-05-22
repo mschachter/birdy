@@ -62,7 +62,7 @@ class SittOscillator(object):
 
         return np.array([[j11, j12], [j21, j22]])
 
-    def step(self):
+    def step(self, ):
         self.t += 1
         self.ode.integrate(self.t*self.dt)
         if not self.ode.successful():
