@@ -3,5 +3,7 @@
 .idea
 *.o
 *.a
+*.so
+src/python/build
 
 

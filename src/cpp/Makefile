@@ -3,12 +3,15 @@ CFLAGS= -fpic
 FILES = physical_oscillator.o
 INCLUDE=
 LIBS= -lgsl -lcblas -lm
-LIBS_DIR=-L./ -L/usr/lib
+LIBS_DIR=
 
-#all: liboscillator.a
+all: liboscillator.a
+
+liboscillator.a: $(FILES)
+	ar rus liboscillator.a $(FILES)
 
 physical_oscillator.o: physical_oscillator.cpp
-	$(CC) $(CFLAGS) $(INCLUDE) $(LIBS_DIR) -o physical_oscillator physical_oscillator.cpp $(LIBS)
+	$(CC) $(CFLAGS) $(INCLUDE) $(LIBS_DIR) -c -o physical_oscillator.o physical_oscillator.cpp $(LIBS)
 
 clean:
-	rm *.o
+	rm *.o *.a

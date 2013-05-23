@@ -61,10 +61,8 @@ int physical_oscillator_jacobian(double t, const double state[], double* d2state
 	return GSL_SUCCESS;
 }
 
-void physical_oscillator_run(double** output, double* initial_state, double duration,
-                             double dt, double k1, double psub, double f0)
+void physical_oscillator_run(double** output, double* initial_state, double duration, double dt, PhysicalParams* pp)
 {
-    PhysicalParams* pp = physical_oscillator_init(k1, psub, f0);
 
     double t = 0.0;
     double t1 = dt;
@@ -98,6 +96,7 @@ void physical_oscillator_run(double** output, double* initial_state, double dura
 	gsl_odeiv_step_free(s);
 }
 
+/*
 int main(int nargs, char** args)
 {
     double duration = 0.050;
@@ -116,7 +115,9 @@ int main(int nargs, char** args)
     initial_state[0] = 0.0;
     initial_state[1] = 0.0;
 
-    physical_oscillator_run(output, initial_state, duration, dt, k1, psub, f0);
+    PhysicalParams* pp = physical_oscillator_init(k1, psub, f0);
+
+    physical_oscillator_run(output, initial_state, duration, dt, pp);
 
     for (int k = 0; k < nsteps; k++) {
         printf("Step %d: x=%0.6f, v=%0.6f\n", k, output[k][0], output[k][1]);
@@ -124,3 +125,4 @@ int main(int nargs, char** args)
 
     return 0;
 }
+*/

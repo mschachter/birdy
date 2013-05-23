@@ -21,10 +21,6 @@ typedef struct
 PhysicalParams* physical_oscillator_init(double k1, double psub, double f0);
 int physical_oscillator_rhs(double t, const double state[], double dstate[], void* params);
 int physical_oscillator_jacobian(double t, const double state[], double* d2state, double* d2t, void* params);
-void physical_oscillator_run(double* output, double duration, double dt, double k1, double psub, double f0);
+void physical_oscillator_run(double** output, double* initial_state, double duration, double dt, PhysicalParams* pp);
 
 #endif
-
-
-
-
