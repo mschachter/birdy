@@ -78,19 +78,20 @@ class SittOscillator(object):
             trajectory[k+1, :] = self.state
         return trajectory
 
-    def plot_trajectory(self, traj):
 
-        x = traj[:, 0]
-        v = traj[:, 1]
-        t = np.arange(traj.shape[0])*self.dt
+def plot_trajectory(traj, dt):
 
-        plt.figure()
-        plt.subplot(2, 1, 1)
-        plt.plot(t, x, 'k-')
-        plt.title('x(t)')
-        plt.subplot(2, 1, 2)
-        plt.plot(t, v, 'b-')
-        plt.title('v(t)')
+    x = traj[:, 0]
+    v = traj[:, 1]
+    t = np.arange(traj.shape[0])*dt
+
+    plt.figure()
+    plt.subplot(2, 1, 1)
+    plt.plot(t, x, 'k-')
+    plt.title('x(t)')
+    plt.subplot(2, 1, 2)
+    plt.plot(t, v, 'b-')
+    plt.title('v(t)')
 
 
 class SittVocalTract(object):

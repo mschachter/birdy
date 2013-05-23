@@ -5,5 +5,7 @@
 *.a
 *.so
 src/python/build
+src/python/*.c
+src/python/*.cpp
 
 

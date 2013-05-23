@@ -10,8 +10,7 @@
 PhysicalParams* physical_oscillator_init(double k1, double psub, double f0)
 {
     PhysicalParams* pp = new PhysicalParams();
-    //pp->m = 4e-10;
-    pp->m = 0.4;
+    pp->m = 4e-10;
     pp->k1 = k1;
     pp->k2 = 400;
     pp->beta1 = 444e-7;
@@ -61,13 +60,24 @@ int physical_oscillator_jacobian(double t, const double state[], double* d2state
 	return GSL_SUCCESS;
 }
 
+void test_function(double** x, int size)
+{
+    printf("in test function\n");
+    for (int k = 0; k < size; k++) {
+        printf("x[%d, 0]=%0.6f\n", k, x[k][0]);
+        printf("x[%d, 1]=%0.6f\n", k, x[k][1]);
+        x[k][1] = x[k][1]*x[k][0];
+    }
+}
+
 void physical_oscillator_run(double** output, double* initial_state, double duration, double dt, PhysicalParams* pp)
 {
-
     double t = 0.0;
     double t1 = dt;
     double start_step = 1e-10;
     double next_state[2] = {initial_state[0], initial_state[1]};
+    printf("dt=%0.6f, initial_x=%0.6f, initial_v=%0.6f, k1=%0.6f, psub=%0.6f, f0=%0.6f\n",
+           dt, initial_state[0], initial_state[1], pp->k1, pp->psub, pp->f0);
 
     const gsl_odeiv_step_type* T = gsl_odeiv_step_rk8pd;
 	gsl_odeiv_step* s = gsl_odeiv_step_alloc(T, 2);
