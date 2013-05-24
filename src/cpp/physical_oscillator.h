@@ -18,8 +18,6 @@ typedef struct
 
 } PhysicalParams;
 
-void test_function(double** x, int size);
-
 PhysicalParams* physical_oscillator_init(double k1, double psub, double f0);
 int physical_oscillator_rhs(double t, const double state[], double dstate[], void* params);
 int physical_oscillator_jacobian(double t, const double state[], double* d2state, double* d2t, void* params);

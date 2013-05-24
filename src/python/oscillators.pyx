@@ -45,7 +45,7 @@ cdef class PhysicalOscillator:
         istate[1] = initial_v
 
         #create output array that contains the 2D state
-        cdef int nsteps = int(duration / dt) + 1
+        cdef int nsteps = int(np.ceil(duration / dt))
         cdef np.ndarray output = np.zeros([nsteps, 2], dtype=np.double)
 
         #run the simulation and return the output state
@@ -72,7 +72,7 @@ cdef class NormalOscillator:
         istate[1] = initial_v
 
         #create output array that contains the 2D state
-        cdef int nsteps = int(duration / dt) + 1
+        cdef int nsteps = int(np.ceil(duration / dt))
         cdef np.ndarray output = np.zeros([nsteps, 2], dtype=np.double)
 
         #run the simulation and return the output state
