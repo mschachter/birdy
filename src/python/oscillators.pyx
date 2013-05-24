@@ -7,11 +7,13 @@ cimport numpy as np
 
 from libc.stdlib cimport malloc, free
 
+
 cdef double** np2c_double2d(np.ndarray[double, ndim=2] a):
     cdef double** a_c = <double**> malloc(a.shape[0] * sizeof(double*))
     for k in range(a.shape[0]):
         a_c[k] = &a[k, 0]
     return a_c
+
 
 cdef extern from "../cpp/physical_oscillator.h":
     ctypedef struct PhysicalParams:
@@ -19,11 +21,15 @@ cdef extern from "../cpp/physical_oscillator.h":
     PhysicalParams* physical_oscillator_init(double k1, double psub, double f0)
     void physical_oscillator_run(double** output, double* initial_state, double duration, double dt, PhysicalParams* pp)
 
+
 cdef extern from "../cpp/normal_oscillator.h":
     ctypedef struct NormalParams:
         pass
     NormalParams* normal_oscillator_init(double alpha, double beta)
     void normal_oscillator_run(double** output, double* initial_state, double duration, double dt, NormalParams* pp)
+    double normal_oscillator_nullcline_x(double* state, NormalParams* pp)
+    double normal_oscillator_nullcline_dx(double* state, NormalParams* pp)
+
 
 cdef class PhysicalOscillator:
 
@@ -52,6 +58,7 @@ cdef class PhysicalOscillator:
         physical_oscillator_run(np2c_double2d(output), <double*>istate.data, duration, dt, pp)
         return output
 
+
 cdef class NormalOscillator:
 
     def __cinit__(self):
@@ -59,6 +66,22 @@ cdef class NormalOscillator:
 
     def __dealloc__(self):
         pass
+
+    cpdef nullcline_x(self, double x, double alpha, double beta):
+
+        cdef NormalParams* pp = normal_oscillator_init(alpha, beta)
+        cdef np.ndarray state = np.zeros([2], dtype=np.double)
+        state[0] = x
+        state[1] = 0.0
+        return normal_oscillator_nullcline_x(<double*>state.data, pp)
+
+    cpdef nullcline_dx(self, double x, double alpha, double beta):
+
+        cdef NormalParams* pp = normal_oscillator_init(alpha, beta)
+        cdef np.ndarray state = np.zeros([2], dtype=np.double)
+        state[0] = x
+        state[1] = 0.0
+        return normal_oscillator_nullcline_dx(<double*>state.data, pp)
 
     cpdef simulate(self, double initial_x, double initial_v, double duration, double dt,
                          double alpha=-0.41769, double beta=-0.346251775):

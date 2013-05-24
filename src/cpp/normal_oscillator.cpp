@@ -61,8 +61,25 @@ void normal_oscillator_run(double** output, double* initial_state, double durati
     run_ode(output, initial_state, duration, dt, &sys);
 }
 
-
 double normal_oscillator_nullcline_x(double* state, NormalParams* pp)
 {
-    return 0.0;
+    double x = state[0];
+    double x2 = x*x;
+    double x3 = x*x*x;
+
+    double gamma = pp->gamma;
+    double gamma2 = gamma*gamma;
+
+    return gamma2*pp->alpha + gamma2*pp->beta*x + gamma2*x2 - gamma*x3;
+}
+
+double normal_oscillator_nullcline_dx(double* state, NormalParams* pp)
+{
+    double x = state[0];
+    double x2 = x*x;
+
+    double gamma = pp->gamma;
+    double gamma2 = gamma*gamma;
+
+    return gamma2*pp->beta + 2*gamma2*x - 3*gamma*x2;
 }
