@@ -7,20 +7,11 @@ cimport numpy as np
 
 from libc.stdlib cimport malloc, free
 
-cdef double** npy2c_double2d(np.ndarray[double, ndim=2] a):
+cdef double** np2c_double2d(np.ndarray[double, ndim=2] a):
     cdef double** a_c = <double**> malloc(a.shape[0] * sizeof(double*))
     for k in range(a.shape[0]):
         a_c[k] = &a[k, 0]
     return a_c
-
-cdef extern from "numpy/arrayobject.h":
-    ctypedef int intp
-    ctypedef extern class numpy.ndarray [object PyArrayObject]:
-        cdef char *data
-        cdef int nd
-        cdef intp *dimensions
-        cdef intp *strides
-        cdef int flags
 
 cdef extern from "../cpp/physical_oscillator.h":
     ctypedef struct PhysicalParams:
@@ -58,7 +49,7 @@ cdef class PhysicalOscillator:
         cdef np.ndarray output = np.zeros([nsteps, 2], dtype=np.double)
 
         #run the simulation and return the output state
-        physical_oscillator_run(npy2c_double2d(output), <double*>istate.data, duration, dt, pp)
+        physical_oscillator_run(np2c_double2d(output), <double*>istate.data, duration, dt, pp)
         return output
 
 cdef class NormalOscillator:
@@ -85,5 +76,5 @@ cdef class NormalOscillator:
         cdef np.ndarray output = np.zeros([nsteps, 2], dtype=np.double)
 
         #run the simulation and return the output state
-        normal_oscillator_run(npy2c_double2d(output), <double*>istate.data, duration, dt, pp)
+        normal_oscillator_run(np2c_double2d(output), <double*>istate.data, duration, dt, pp)
         return output
