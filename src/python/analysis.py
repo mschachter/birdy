@@ -146,9 +146,3 @@ def plot_fixedpoints(fp_file):
 
 
 
-
-
-
-
-
-
