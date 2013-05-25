@@ -56,6 +56,6 @@ int physical_oscillator_jacobian(double t, const double state[], double* d2state
 
 void physical_oscillator_run(double** output, double* initial_state, double duration, double dt, PhysicalParams* pp)
 {
-	gsl_odeiv_system sys = {physical_oscillator_rhs, physical_oscillator_jacobian, 2, pp};
+	gsl_odeiv2_system sys = {physical_oscillator_rhs, physical_oscillator_jacobian, 2, pp};
     run_ode(output, initial_state, duration, dt, &sys);
 }

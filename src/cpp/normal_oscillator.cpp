@@ -11,6 +11,11 @@ NormalParams* normal_oscillator_init(double alpha, double beta)
     return pp;
 }
 
+void normal_oscillator_delete(NormalParams* pp)
+{
+    delete pp;
+}
+
 int normal_oscillator_rhs(double t, const double state[], double dstate[], void* params)
 {
     NormalParams* pp = (NormalParams*) params;
@@ -57,7 +62,7 @@ int normal_oscillator_jacobian(double t, const double state[], double* d2state, 
 
 void normal_oscillator_run(double** output, double* initial_state, double duration, double dt, NormalParams* pp)
 {
-    gsl_odeiv_system sys = {normal_oscillator_rhs, normal_oscillator_jacobian, 2, pp};
+    gsl_odeiv2_system sys = {normal_oscillator_rhs, normal_oscillator_jacobian, 2, pp};
     run_ode(output, initial_state, duration, dt, &sys);
 }
 

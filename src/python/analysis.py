@@ -2,11 +2,14 @@ import h5py
 import numpy as np
 
 from scipy.optimize import newton
+from scipy.fftpack import fft,fftfreq
 
 import matplotlib.pyplot as plt
 import operator
+import time
 
 from oscillators import NormalOscillator,PhysicalOscillator
+
 
 def plot_trajectory(traj, dt):
 
@@ -14,14 +17,22 @@ def plot_trajectory(traj, dt):
     v = traj[:, 1]
     t = np.arange(traj.shape[0])*dt
 
+    fftx = fft(x)
+    f = fftfreq(len(x), d=dt)
+
     plt.figure()
-    plt.subplot(2, 1, 1)
+    plt.subplot(3, 1, 1)
     plt.plot(t, x, 'k-')
     plt.title('x(t)')
-    plt.subplot(2, 1, 2)
+    plt.subplot(3, 1, 2)
     plt.plot(t, v, 'b-')
     plt.title('v(t)')
+    plt.subplot(3, 1, 3)
 
+    findx = (f > 100.0) & (f < 12000.0)
+    plt.plot(f[findx], np.log10(np.abs(fftx[findx])), 'k-')
+    plt.title('Power Spectrum')
+    plt.axis('tight')
 
 def find_fixedpoints_normal(xmin=-10.0, xmax=10.0, xstep=1e-3, alpha=-0.41769, beta=-0.346251775, plot=False):
 
@@ -69,15 +80,19 @@ def find_fixedpoints_normal(xmin=-10.0, xmax=10.0, xstep=1e-3, alpha=-0.41769, b
 
     return roots
 
-def find_fixedpoints_grid_normal(output_file=None, xmin=-10.0, xmax=10.0, xstep=1e-3, alphamin=-0.45, alphamax=0.45, alphastep=0.001, betamin=-0.40, betamax=0.20, betastep=0.001):
 
+def find_fixedpoints_grid_normal(output_file=None, xmin=-10.0, xmax=10.0, xstep=1e-3, alphamin=-1.00, alphamax=0.05, alphastep=0.01, betamin=-0.60, betamax=0.60, betastep=0.01):
 
+    stime = time.time()
     alpharng = np.arange(alphamin, alphamax, alphastep)
     betarng = np.arange(betamin, betamax, betastep)
 
     nrows = len(alpharng)
     ncols = len(betarng)
     print '# of (alpha,beta) pairs: %d' % (nrows*ncols)
+
+    total_mem = ((nrows*ncols*2)+(nrows*ncols*3*2)*8.0) / 1024.0**2
+    print 'Total Memory: %0.0f MB' % total_mem
 
     all_pairs = np.zeros([nrows, ncols, 2])
     all_roots = np.zeros([nrows, ncols, 3, 2]) * np.nan
@@ -88,6 +103,8 @@ def find_fixedpoints_grid_normal(output_file=None, xmin=-10.0, xmax=10.0, xstep=
             all_pairs[i, j, :] = [alpha, beta]
             for k,(xz,xz_val) in enumerate(roots):
                 all_roots[i, j, k, :] = [xz, xz_val]
+    etime = time.time() - stime
+    print 'Elapsed Time: %0.2f s' % etime
 
     if output_file is not None:
         hf = h5py.File(output_file, 'w')
@@ -95,6 +112,34 @@ def find_fixedpoints_grid_normal(output_file=None, xmin=-10.0, xmax=10.0, xstep=
         hf['all_roots'] = all_roots
         hf.close()
 
+
+def plot_fixedpoints(fp_file):
+    hf = h5py.File(fp_file, 'r')
+    all_pairs = np.array(hf['all_pairs'])
+    all_roots = np.array(hf['all_roots'])
+    hf.close()
+
+    alpha = all_pairs[:, :, 0]
+    beta = all_pairs[:, :, 1]
+
+    fixed_points = all_roots[:, :, :, 0]
+    num_fixed_points = (~np.isnan(fixed_points)).sum(-1)
+
+    alpha_y = alpha[:, 0]
+    beta_x = beta[0, :]
+    ytick_rng = range(0, len(alpha_y), 8)
+    xtick_rng = range(0, len(beta_x), 8)
+
+    plt.figure()
+    plt.imshow(num_fixed_points, interpolation='nearest', aspect='auto')
+    plt.colorbar()
+    plt.xticks(xtick_rng, ['%0.2f' % x for x in beta_x[xtick_rng]])
+    plt.yticks(ytick_rng, ['%0.2f' % y for y in alpha_y[ytick_rng]])
+    plt.xlabel('Beta')
+    plt.ylabel('Alpha')
+    plt.title('# of Fixed Points')
+
+    return alpha,beta,fixed_points,num_fixed_points
 
 
 

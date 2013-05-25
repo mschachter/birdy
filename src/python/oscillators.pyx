@@ -26,6 +26,7 @@ cdef extern from "../cpp/normal_oscillator.h":
     ctypedef struct NormalParams:
         pass
     NormalParams* normal_oscillator_init(double alpha, double beta)
+    void normal_oscillator_delete(NormalParams* pp)
     void normal_oscillator_run(double** output, double* initial_state, double duration, double dt, NormalParams* pp)
     double normal_oscillator_nullcline_x(double* state, NormalParams* pp)
     double normal_oscillator_nullcline_dx(double* state, NormalParams* pp)
@@ -73,7 +74,11 @@ cdef class NormalOscillator:
         cdef np.ndarray state = np.zeros([2], dtype=np.double)
         state[0] = x
         state[1] = 0.0
-        return normal_oscillator_nullcline_x(<double*>state.data, pp)
+        cdef double nx = normal_oscillator_nullcline_x(<double*>state.data, pp)
+
+        del state
+        normal_oscillator_delete(pp)
+        return nx
 
     cpdef nullcline_dx(self, double x, double alpha, double beta):
 
@@ -81,7 +86,11 @@ cdef class NormalOscillator:
         cdef np.ndarray state = np.zeros([2], dtype=np.double)
         state[0] = x
         state[1] = 0.0
-        return normal_oscillator_nullcline_dx(<double*>state.data, pp)
+        cdef double ndx = normal_oscillator_nullcline_dx(<double*>state.data, pp)
+
+        del state
+        normal_oscillator_delete(pp)
+        return ndx
 
     cpdef simulate(self, double initial_x, double initial_v, double duration, double dt,
                          double alpha=-0.41769, double beta=-0.346251775):
@@ -100,4 +109,7 @@ cdef class NormalOscillator:
 
         #run the simulation and return the output state
         normal_oscillator_run(np2c_double2d(output), <double*>istate.data, duration, dt, pp)
+
+        del istate
+        normal_oscillator_delete(pp)
         return output
