@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1105</width>
-    <height>740</height>
+    <height>918</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <x>-1</x>
       <y>-1</y>
       <width>1111</width>
-      <height>691</height>
+      <height>841</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -107,7 +107,7 @@
            <x>0</x>
            <y>330</y>
            <width>291</width>
-           <height>141</height>
+           <height>161</height>
           </rect>
          </property>
          <property name="styleSheet">
@@ -175,13 +175,26 @@
           <property name="geometry">
            <rect>
             <x>100</x>
-            <y>100</y>
+            <y>130</y>
             <width>98</width>
             <height>27</height>
            </rect>
           </property>
           <property name="text">
            <string>Simulate</string>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="displaySpectrogramCheckBox">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>100</y>
+            <width>171</width>
+            <height>22</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Display Spectrogram</string>
           </property>
          </widget>
         </widget>
@@ -191,7 +204,7 @@
            <x>300</x>
            <y>0</y>
            <width>801</width>
-           <height>471</height>
+           <height>791</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="simulationPlotLayout"/>

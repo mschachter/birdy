@@ -10,7 +10,7 @@ from matplotlib.figure import Figure
 from ui.gen.mpl_popup_window import Ui_MplPopupWindow
 
 from ui.gen.mpl_widget import Ui_MplWidget
-
+from ui.config import get_image_path
 
 class MplFigure(Ui_MplWidget, QWidget):
 
@@ -31,7 +31,7 @@ class MplFigure(Ui_MplWidget, QWidget):
         self.button_layout.setSizeConstraint(QLayout.SetFixedSize)
 
         icon = QIcon()
-        icon.addPixmap(QPixmap(self.controller.get_image_path('popup_icon.png')), QIcon.Normal, QIcon.Off)
+        icon.addPixmap(QPixmap(get_image_path('popup_icon.png')), QIcon.Normal, QIcon.Off)
         self.toolButton = QToolButton(parent=None)
         self.toolButton.setIcon(icon)
         self.toolButton.setIconSize(QSize(16, 16))
@@ -41,7 +41,7 @@ class MplFigure(Ui_MplWidget, QWidget):
 
         for sa in special_actions:
             icon = QIcon()
-            icon.addPixmap(QPixmap(self.controller.get_image_path(sa.icon_path)), QIcon.Normal, QIcon.Off)
+            icon.addPixmap(QPixmap(get_image_path(sa.icon_path)), QIcon.Normal, QIcon.Off)
             tb = QToolButton(parent=tw)
             tb.setIcon(icon)
             tb.setIconSize(QSize(16, 16))
@@ -54,7 +54,7 @@ class MplFigure(Ui_MplWidget, QWidget):
 
     def popup_clicked(self):
         if self.popup is None:
-            self.popup = MplFigurePopup(self.controller, self.figure, parent=self)
+            self.popup = MplFigurePopup(self.figure, parent=self)
         self.popup.show()
 
 

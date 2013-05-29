@@ -15,6 +15,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.controller = controller
 
+        self.simulateButton.clicked.connect(self.simulate_clicked)
+
         self.populate_models()
         self.select_model('Normal')
 
@@ -28,6 +30,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         for pname,cparam in model.get_control_params().iteritems():
             clayout = cparam.create_widget()
             self.oscillatorParametersLayout.addLayout(clayout)
+
+        self.controller.oscillator_model = model
+
+    def simulate_clicked(self, checked):
+
+        duration = float(self.durationEdit.text())
+        dt = float(self.stepSizeEdit.text())
+        print self.controller.oscillator_model
+
+        print 'Simulating: dt=%0.6f, duration=%0.6f...' % (dt, duration)
+        sim_output = self.controller.run_simulation(self.controller.oscillator_model, duration, dt)
+        self.controller.simulation_output = sim_output
+        print 'Simulation done!'
+
+        sim_widget = sim_output.create_widget()
+        self.simulationPlotLayout.addWidget(sim_widget)
 
 
 def main():

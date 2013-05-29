@@ -20,7 +20,7 @@ class NormalOscillatorModel(OscillatorModel):
 
     def __init__(self):
         OscillatorModel.__init__(self)
-        self.oscillator = NormalOscillator
+        self.oscillator = NormalOscillator()
 
         self.control_params = dict()
         self.control_params['alpha'] = ControlParameter('alpha', [-0.70, 0.05], -0.41769)
@@ -31,6 +31,7 @@ class NormalOscillatorModel(OscillatorModel):
 
     def get_control_params(self):
         return self.control_params
+
 
 
 
@@ -90,14 +91,14 @@ ALL_MODELS = {'Normal': NormalOscillatorModel()}
 
 class SimulationOutput(object):
 
-    def __init__(self, waveform, duration, dt):
-        self.waveform = waveform
+    def __init__(self, output, duration, dt):
+        self.output = output
         self.duration = duration
         self.dt = dt
 
         wf = WavFile()
         wf.sample_rate = 1.0 / dt
-        wf.data = self.waveform
+        wf.data = self.output[:, 0]
 
         self.wav_file = wf
 

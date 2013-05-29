@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_window.ui'
 #
-# Created: Wed May 29 10:26:47 2013
+# Created: Wed May 29 12:47:01 2013
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,11 +17,11 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(1105, 740)
+        MainWindow.resize(1105, 918)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.horizontalLayoutWidget = QtGui.QWidget(self.centralwidget)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(-1, -1, 1111, 691))
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(-1, -1, 1111, 841))
         self.horizontalLayoutWidget.setObjectName(_fromUtf8("horizontalLayoutWidget"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayout.setMargin(0)
@@ -57,7 +57,7 @@ class Ui_MainWindow(object):
         self.oscillatorParametersLayout.setMargin(0)
         self.oscillatorParametersLayout.setObjectName(_fromUtf8("oscillatorParametersLayout"))
         self.simulatorGroupBox = QtGui.QGroupBox(self.tab)
-        self.simulatorGroupBox.setGeometry(QtCore.QRect(0, 330, 291, 141))
+        self.simulatorGroupBox.setGeometry(QtCore.QRect(0, 330, 291, 161))
         self.simulatorGroupBox.setStyleSheet(_fromUtf8("QGroupBox { \n"
 "     border: 2px solid gray; \n"
 "     border-radius: 3px; \n"
@@ -76,10 +76,13 @@ class Ui_MainWindow(object):
         self.durationEdit.setGeometry(QtCore.QRect(90, 60, 191, 27))
         self.durationEdit.setObjectName(_fromUtf8("durationEdit"))
         self.simulateButton = QtGui.QPushButton(self.simulatorGroupBox)
-        self.simulateButton.setGeometry(QtCore.QRect(100, 100, 98, 27))
+        self.simulateButton.setGeometry(QtCore.QRect(100, 130, 98, 27))
         self.simulateButton.setObjectName(_fromUtf8("simulateButton"))
+        self.displaySpectrogramCheckBox = QtGui.QCheckBox(self.simulatorGroupBox)
+        self.displaySpectrogramCheckBox.setGeometry(QtCore.QRect(10, 100, 171, 22))
+        self.displaySpectrogramCheckBox.setObjectName(_fromUtf8("displaySpectrogramCheckBox"))
         self.verticalLayoutWidget_2 = QtGui.QWidget(self.tab)
-        self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(300, 0, 801, 471))
+        self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(300, 0, 801, 791))
         self.verticalLayoutWidget_2.setObjectName(_fromUtf8("verticalLayoutWidget_2"))
         self.simulationPlotLayout = QtGui.QVBoxLayout(self.verticalLayoutWidget_2)
         self.simulationPlotLayout.setMargin(0)
@@ -112,6 +115,7 @@ class Ui_MainWindow(object):
         self.durationHelpLabel_2.setText(QtGui.QApplication.translate("MainWindow", "Duration:", None, QtGui.QApplication.UnicodeUTF8))
         self.durationEdit.setText(QtGui.QApplication.translate("MainWindow", "0.050", None, QtGui.QApplication.UnicodeUTF8))
         self.simulateButton.setText(QtGui.QApplication.translate("MainWindow", "Simulate", None, QtGui.QApplication.UnicodeUTF8))
+        self.displaySpectrogramCheckBox.setText(QtGui.QApplication.translate("MainWindow", "Display Spectrogram", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QtGui.QApplication.translate("MainWindow", "Model", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QtGui.QApplication.translate("MainWindow", "Tab 2", None, QtGui.QApplication.UnicodeUTF8))
 
