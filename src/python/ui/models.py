@@ -3,6 +3,8 @@ from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QSlider
 
 from oscillators import NormalOscillator
+from sound import WavFile
+from ui.mpl_figure import MplFigure
 
 
 class OscillatorModel(object):
@@ -13,29 +15,23 @@ class OscillatorModel(object):
     def get_control_params(self):
         pass
 
-    def get_control_bounds(self, control_param):
-        pass
-
-    def get_control_default(self, control_param):
-        pass
-
 
 class NormalOscillatorModel(OscillatorModel):
 
     def __init__(self):
         OscillatorModel.__init__(self)
         self.oscillator = NormalOscillator
-        self.bounds = {'alpha': [-0.70, 0.05], 'beta': [-0.40, 0.40]}
-        self.defaults = {'alpha':-0.41769, 'beta':-0.346251775}
 
-    def get_control_params(self):
+        self.control_params = dict()
+        self.control_params['alpha'] = ControlParameter('alpha', [-0.70, 0.05], -0.41769)
+        self.control_params['beta'] = ControlParameter('beta', [-0.40, 0.40], -0.346251775)
+
+    def get_control_param_names(self):
         return ['alpha', 'beta']
 
-    def get_control_bounds(self, control_param):
-        return self.bounds[control_param]
+    def get_control_params(self):
+        return self.control_params
 
-    def get_control_default(self, control_param):
-        return self.defaults[control_param]
 
 
 class ControlParameter(object):
@@ -66,7 +62,7 @@ class ControlParameter(object):
         self.pedit.setText('%0.6f' % self.current_val)
         self.set_slider_value(self.current_val)
 
-    def create_layout(self):
+    def create_widget(self, parent=None):
         mlayout = QVBoxLayout()
 
         hlayout = QHBoxLayout()
@@ -90,3 +86,22 @@ class ControlParameter(object):
         return mlayout
 
 ALL_MODELS = {'Normal': NormalOscillatorModel()}
+
+
+class SimulationOutput(object):
+
+    def __init__(self, waveform, duration, dt):
+        self.waveform = waveform
+        self.duration = duration
+        self.dt = dt
+
+        wf = WavFile()
+        wf.sample_rate = 1.0 / dt
+        wf.data = self.waveform
+
+        self.wav_file = wf
+
+    def create_widget(self, parent=None):
+        mplfig = MplFigure(parent=parent)
+        self.wav_file.plot(mplfig.figure, min_freq=100.0, max_freq=10000.0, spec_sample_rate=1000.0, freq_spacing=125.0, rms_thresh=0.0)
+        return mplfig

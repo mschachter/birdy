@@ -92,6 +92,13 @@ cdef class NormalOscillator:
         normal_oscillator_delete(pp)
         return ndx
 
+    def run_simulation(self, cparams, duration, dt):
+        if 'alpha' not in cparams:
+            raise Exception('alpha parameter must be supplied for run_simulation')
+        if 'beta' not in cparams:
+            raise Exception('beta parameter must be supplied for run_simulation')
+        return self.simulate(0.0, 0.0, duration, dt, alpha=cparams['alpha'], beta=cparams['beta'])
+
     cpdef simulate(self, double initial_x, double initial_v, double duration, double dt,
                          double alpha=-0.41769, double beta=-0.346251775):
 

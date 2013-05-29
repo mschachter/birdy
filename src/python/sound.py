@@ -41,20 +41,21 @@ class WavFile():
         wf.writeframes(''.join(hex_sound))
         wf.close()
 
-    def plot(self, min_freq=0, max_freq=None, spec_sample_rate=1000.0, freq_spacing=125.0, rms_thresh=1.0):
+    def plot(self, fig=None, min_freq=0, max_freq=None, spec_sample_rate=1000.0, freq_spacing=125.0, rms_thresh=1.0):
 
         ts = np.arange(0.0, len(self.data), 1.0) / self.sample_rate
         t,f,spec,spec_rms = log_spectrogram(self.data, self.sample_rate, spec_sample_rate=spec_sample_rate, freq_spacing=freq_spacing, min_freq=min_freq, max_freq=max_freq)
         spec[:, spec_rms < rms_thresh] = 0.0
 
-        plt.figure()
+        if fig is None:
+            fig = plt.figure()
         gs = plt.GridSpec(100, 1)
-        plt.subplot(gs[:15])
+        ax = fig.add_subplot(gs[:15])
         plt.plot(ts, self.data, 'k-')
         plt.axis('tight')
         plt.ylabel('Sound Pressure')
 
-        ax = plt.subplot(gs[20:55])
+        ax = fig.add_subplot(gs[20:55])
         plt.imshow(spec, aspect='auto', interpolation='nearest', origin='lower')
         nxticks = 8
         nyticks = 4
@@ -66,7 +67,7 @@ class WavFile():
         plt.yticks(ytick_indices, ['%d' % x for x in f[ytick_indices]])
         plt.ylabel('Frequency (Hz)')
 
-        plt.subplot(gs[60:95])
+        ax = fig.add_subplot(gs[60:95])
         plt.plot(t, spec_rms, 'g-')
         plt.xlabel('Time (s)')
         plt.ylabel('RMS')

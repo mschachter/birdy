@@ -1,10 +1,11 @@
 import sys
 
 from PyQt4.QtGui import QApplication, QMainWindow
+from ui.controllers import MainController
 
 from ui.gen.main_window import *
 
-from ui.models import ALL_MODELS, ControlParameter
+from ui.models import ALL_MODELS
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -18,24 +19,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.select_model('Normal')
 
     def populate_models(self):
-
-        self.control_params = dict()
-
         for model_name,model in ALL_MODELS.iteritems():
-            for pname in model.get_control_params():
-                dval = model.get_control_default(pname)
-                min_val,max_val = model.get_control_bounds(pname)
-                cparam = ControlParameter(pname, (min_val, max_val), dval)
-                self.control_params[pname] = cparam
-
             self.modelComboBox.addItem(model_name)
 
     def select_model(self, model_name):
         model = ALL_MODELS[model_name]
 
-        for pname in model.get_control_params():
-            cparam = self.control_params[pname]
-            clayout = cparam.create_layout()
+        for pname,cparam in model.get_control_params().iteritems():
+            clayout = cparam.create_widget()
             self.oscillatorParametersLayout.addLayout(clayout)
 
 
@@ -43,6 +34,7 @@ def main():
     print 'Starting birdy app...'
     app = QApplication([])
 
-    main_window = MainWindow(None)
+    controller = MainController()
+    main_window = MainWindow(controller)
     main_window.show()
     sys.exit(app.exec_())

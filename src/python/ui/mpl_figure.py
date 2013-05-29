@@ -7,18 +7,18 @@ import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 from matplotlib.figure import Figure
-from netman.ui.gen.mpl_popup_window import Ui_MplPopupWindow
+from ui.gen.mpl_popup_window import Ui_MplPopupWindow
 
-from netman.ui.gen.mpl_widget import Ui_MplWidget
+from ui.gen.mpl_widget import Ui_MplWidget
+
 
 class MplFigure(Ui_MplWidget, QWidget):
 
-    def __init__(self, app_controller, parent=None, special_actions=[]):
+    def __init__(self, parent=None, special_actions=[]):
         QWidget.__init__(self, parent=parent)
         self.setupUi(self)
 
         self.popup = None
-        self.controller = app_controller
 
         self.figure = Figure()
         self.figure.subplots_adjust(left=0.08, right=0.92, top=0.92, bottom=0.08)
@@ -54,17 +54,16 @@ class MplFigure(Ui_MplWidget, QWidget):
 
     def popup_clicked(self):
         if self.popup is None:
-            popup = MplFigurePopup(self.controller, self.figure, parent=self)
-        popup.show()
+            self.popup = MplFigurePopup(self.controller, self.figure, parent=self)
+        self.popup.show()
 
 
 class MplFigurePopup(Ui_MplPopupWindow, QDialog):
 
-    def __init__(self, app_controller, figure, parent=None):
+    def __init__(self, figure, parent=None):
         QDialog.__init__(self, parent=parent)
         self.setupUi(self)
 
-        self.controller = app_controller
         self.figure = figure
         self.canvas = FigureCanvas(self.figure)
         self.canvas.setParent(self)

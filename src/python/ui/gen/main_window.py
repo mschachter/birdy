@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_window.ui'
 #
-# Created: Tue May 28 16:51:13 2013
+# Created: Wed May 29 10:26:47 2013
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -78,6 +78,12 @@ class Ui_MainWindow(object):
         self.simulateButton = QtGui.QPushButton(self.simulatorGroupBox)
         self.simulateButton.setGeometry(QtCore.QRect(100, 100, 98, 27))
         self.simulateButton.setObjectName(_fromUtf8("simulateButton"))
+        self.verticalLayoutWidget_2 = QtGui.QWidget(self.tab)
+        self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(300, 0, 801, 471))
+        self.verticalLayoutWidget_2.setObjectName(_fromUtf8("verticalLayoutWidget_2"))
+        self.simulationPlotLayout = QtGui.QVBoxLayout(self.verticalLayoutWidget_2)
+        self.simulationPlotLayout.setMargin(0)
+        self.simulationPlotLayout.setObjectName(_fromUtf8("simulationPlotLayout"))
         self.tabWidget.addTab(self.tab, _fromUtf8(""))
         self.tab_2 = QtGui.QWidget()
         self.tab_2.setObjectName(_fromUtf8("tab_2"))
