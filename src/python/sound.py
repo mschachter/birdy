@@ -4,7 +4,7 @@ import struct
 
 import numpy as np
 from scipy.io.wavfile import read as read_wavfile
-import scipy.fftpack as fft
+from scipy.fftpack import fft,fftfreq
 
 import matplotlib.pyplot as plt
 
@@ -41,37 +41,61 @@ class WavFile():
         wf.writeframes(''.join(hex_sound))
         wf.close()
 
-    def plot(self, fig=None, min_freq=0, max_freq=None, spec_sample_rate=1000.0, freq_spacing=125.0, rms_thresh=1.0):
+    def analyze(self, min_freq=0, max_freq=10000.0, spec_sample_rate=1000.0, freq_spacing=125.0):
 
-        ts = np.arange(0.0, len(self.data), 1.0) / self.sample_rate
+        self.data_t = np.arange(0.0, len(self.data), 1.0) / self.sample_rate
+
+        #compute log power spectrum
+        fftx = fft(self.data)
+        ps_f = fftfreq(len(self.data), d=(1.0 / self.sample_rate))
+        findx = (ps_f > min_freq) & (ps_f < max_freq)
+        self.power_spectrum = np.log10(np.abs(fftx[findx]))
+        self.power_spectrum_f = ps_f[findx]
+
+        #compute spectrogram
         t,f,spec,spec_rms = log_spectrogram(self.data, self.sample_rate, spec_sample_rate=spec_sample_rate, freq_spacing=freq_spacing, min_freq=min_freq, max_freq=max_freq)
-        spec[:, spec_rms < rms_thresh] = 0.0
+        self.spectrogram_t = t
+        self.spectrogram_f = f
+        self.spectrogram = spec
+        self.spectrogram_rms = spec_rms
+
+    def plot(self, fig=None):
+
+        self.analyze()
 
         if fig is None:
             fig = plt.figure()
         gs = plt.GridSpec(100, 1)
         ax = fig.add_subplot(gs[:15])
-        plt.plot(ts, self.data, 'k-')
+        plt.plot(self.data_t, self.data, 'k-')
         plt.axis('tight')
         plt.ylabel('Sound Pressure')
 
         ax = fig.add_subplot(gs[20:55])
-        plt.imshow(spec, aspect='auto', interpolation='nearest', origin='lower')
-        nxticks = 8
-        nyticks = 4
-        xtick_spacing = len(t) / nxticks
-        ytick_spacing = len(f) / nyticks
-        xtick_indices = np.arange(0, len(t), xtick_spacing, dtype='int')
-        ytick_indices = np.arange(0, len(f), ytick_spacing, dtype='int')
-        plt.xticks(xtick_indices, ['%0.1f' % x for x in t[xtick_indices]])
-        plt.yticks(ytick_indices, ['%d' % x for x in f[ytick_indices]])
-        plt.ylabel('Frequency (Hz)')
+        self.plot_spectrogram()
 
         ax = fig.add_subplot(gs[60:95])
-        plt.plot(t, spec_rms, 'g-')
+        plt.plot(self.spectrogram_t, self.spectrogram_rms, 'g-')
         plt.xlabel('Time (s)')
         plt.ylabel('RMS')
         plt.axis('tight')
+
+    def plot_spectrogram(self, ax=None):
+        if ax is None:
+            ax = plt.gca()
+        nxticks = 8
+        nyticks = 4
+        ex = (0.0, self.spectrogram_t.max(), self.spectrogram_f.min(), self.spectrogram_f.max())
+        iax = ax.imshow(self.spectrogram, aspect='auto', interpolation='nearest', origin='lower', extent=ex)
+        ax.set_ylabel('Frequency (Hz)')
+        """
+        xtick_spacing = len(self.spectrogram_t) / nxticks
+        ytick_spacing = len(self.spectrogram_f) / nyticks
+        xtick_indices = np.arange(0, len(self.spectrogram_t), xtick_spacing, dtype='int')
+        ytick_indices = np.arange(0, len(self.spectrogram_f), ytick_spacing, dtype='int')
+        ax.set_xticks(xtick_indices, ['%0.1f' % x for x in self.spectrogram_t[xtick_indices]])
+        ax.set_yticks(ytick_indices, ['%d' % x for x in self.spectrogram_f[ytick_indices]])
+        """
 
 
 def play_sound(file_name):
@@ -119,7 +143,7 @@ def gaussian_stft(s, sample_rate, window_length, increment, nstd=6, min_freq=0, 
 
     #get the frequencies corresponding to the FFTs to come
     fft_len = nwinlen+1
-    full_freq = fft.fftfreq(nwinlen+1, d=1.0 / sample_rate)
+    full_freq = fftfreq(nwinlen+1, d=1.0 / sample_rate)
     freq_index = (full_freq >= min_freq) & (full_freq <= max_freq)
     freq = full_freq[freq_index]
     nfreq = freq_index.sum()
@@ -133,7 +157,7 @@ def gaussian_stft(s, sample_rate, window_length, increment, nstd=6, min_freq=0, 
         ei = center + hnwinlen
         rms[k] = zs[si:ei].std(ddof=1)
         windowed_slice = zs[si:ei]*gauss_window
-        zs_fft = fft.fft(windowed_slice, n=fft_len, overwrite_x=1)
+        zs_fft = fft(windowed_slice, n=fft_len, overwrite_x=1)
         timefreq[:, k] = zs_fft[freq_index]
 
     t = np.arange(0, nwindows, 1.0) * increment

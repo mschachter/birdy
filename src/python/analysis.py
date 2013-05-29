@@ -34,6 +34,7 @@ def plot_trajectory(traj, dt):
     plt.title('Power Spectrum')
     plt.axis('tight')
 
+
 def find_fixedpoints_normal(xmin=-10.0, xmax=10.0, xstep=1e-3, alpha=-0.41769, beta=-0.346251775, plot=False):
 
     no = NormalOscillator()
@@ -111,6 +112,72 @@ def find_fixedpoints_grid_normal(output_file=None, xmin=-10.0, xmax=10.0, xstep=
         hf['all_pairs'] = all_pairs
         hf['all_roots'] = all_roots
         hf.close()
+
+
+def find_admissible_controls(output_file=None, alphamin=-1.00, alphamax=0.05, alphastep=0.01, betamin=-0.60, betamax=0.60, betastep=0.01):
+
+    no = NormalOscillator()
+
+    stime = time.time()
+    alpharng = np.arange(alphamin, alphamax, alphastep)
+    betarng = np.arange(betamin, betamax, betastep)
+
+    nrows = len(alpharng)
+    ncols = len(betarng)
+    print '# of (alpha,beta) pairs: %d' % (nrows*ncols)
+
+    total_mem = ((nrows*ncols*2)+(nrows*ncols*3*2)*8.0) / 1024.0**2
+    print 'Total Memory: %0.0f MB' % total_mem
+
+    all_pairs = np.zeros([nrows, ncols, 2])
+    all_dv_rms = np.zeros([nrows, ncols]) * np.nan
+
+    sim_duration = 0.010
+    step_size = 1e-6
+    steady_state_point = 0.005
+    steady_state_index = int(steady_state_point / step_size)
+
+    for i,alpha in enumerate(alpharng):
+        for j,beta in enumerate(betarng):
+            all_pairs[i, j, :] = [alpha, beta]
+            output = no.simulate(0.0, 0.0, duration=sim_duration, dt=step_size, alpha=alpha, beta=beta)
+            dv = np.diff(output[:, 1])
+            dv_rms = dv[steady_state_index:].std(ddof=1)
+            all_dv_rms[i, j] = dv_rms
+
+    etime = time.time() - stime
+    print 'Elapsed Time: %0.2f s' % etime
+
+    if output_file is not None:
+        hf = h5py.File(output_file, 'w')
+        hf['all_pairs'] = all_pairs
+        hf['all_dv_rms'] = all_dv_rms
+        hf.close()
+
+
+def plot_dv_rms(dv_file):
+
+    hf = h5py.File(dv_file, 'r')
+    all_pairs = np.array(hf['all_pairs'])
+    all_dv_rms = np.array(hf['all_dv_rms'])
+    hf.close()
+
+    alpha = all_pairs[:, :, 0]
+    beta = all_pairs[:, :, 1]
+
+    alpha_y = alpha[:, 0]
+    beta_x = beta[0, :]
+    ytick_rng = range(0, len(alpha_y), 8)
+    xtick_rng = range(0, len(beta_x), 8)
+
+    plt.figure()
+    plt.imshow(all_dv_rms, interpolation='nearest', aspect='auto')
+    plt.colorbar()
+    plt.xticks(xtick_rng, ['%0.2f' % x for x in beta_x[xtick_rng]])
+    plt.yticks(ytick_rng, ['%0.2f' % y for y in alpha_y[ytick_rng]])
+    plt.xlabel('Beta')
+    plt.ylabel('Alpha')
+    plt.title('# of Fixed Points')
 
 
 def plot_fixedpoints(fp_file):

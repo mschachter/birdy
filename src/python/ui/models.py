@@ -2,6 +2,8 @@
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QSlider
 
+import matplotlib.pyplot as plt
+
 from oscillators import NormalOscillator
 from sound import WavFile
 from ui.mpl_figure import MplFigure
@@ -31,8 +33,6 @@ class NormalOscillatorModel(OscillatorModel):
 
     def get_control_params(self):
         return self.control_params
-
-
 
 
 class ControlParameter(object):
@@ -99,10 +99,33 @@ class SimulationOutput(object):
         wf = WavFile()
         wf.sample_rate = 1.0 / dt
         wf.data = self.output[:, 0]
+        wf.analyze()
 
         self.wav_file = wf
 
     def create_widget(self, parent=None):
         mplfig = MplFigure(parent=parent)
-        self.wav_file.plot(mplfig.figure, min_freq=100.0, max_freq=10000.0, spec_sample_rate=1000.0, freq_spacing=125.0, rms_thresh=0.0)
+
+        fig = mplfig.figure
+        ax = fig.add_subplot()
+
+        gs = plt.GridSpec(100, 1)
+        ax = fig.add_subplot(gs[:14])
+        ax.plot(self.wav_file.data_t, self.output[:, 0], 'k-')
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel('x(t)')
+
+        ax = fig.add_subplot(gs[20:34])
+        ax.plot(self.wav_file.data_t, self.output[:, 1], 'g-')
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel('v(t)')
+
+        ax = fig.add_subplot(gs[40:54])
+        ax.plot(self.wav_file.power_spectrum_f, self.wav_file.power_spectrum, 'k-')
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel('log10(power)')
+
+        ax = fig.add_subplot(gs[60:94])
+        self.wav_file.plot_spectrogram(ax)
+
         return mplfig

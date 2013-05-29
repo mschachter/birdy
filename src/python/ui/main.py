@@ -44,6 +44,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.controller.simulation_output = sim_output
         print 'Simulation done!'
 
+        #remove previous plot
+        for i in reversed(range(self.simulationPlotLayout.count())):
+            self.simulationPlotLayout.itemAt(i).widget().setParent(None)
+
+        #add new plot
         sim_widget = sim_output.create_widget()
         self.simulationPlotLayout.addWidget(sim_widget)
 
