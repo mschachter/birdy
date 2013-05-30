@@ -6,7 +6,7 @@ PhysicalParams* physical_oscillator_init(double k1, double psub, double f0)
     PhysicalParams* pp = new PhysicalParams();
     pp->m = 4e-10;
     pp->k1 = k1;
-    pp->k2 = 400;
+    pp->k2 = 400.0;
     pp->beta1 = 444e-7;
     pp->beta2 = 4e-11;
     pp->c = 16e-3;

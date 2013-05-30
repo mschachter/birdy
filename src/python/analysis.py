@@ -114,7 +114,7 @@ def find_fixedpoints_grid_normal(output_file=None, xmin=-10.0, xmax=10.0, xstep=
         hf.close()
 
 
-def find_admissible_controls(output_file=None, alphamin=-1.00, alphamax=0.05, alphastep=0.01, betamin=-0.60, betamax=0.60, betastep=0.01):
+def find_admissible_controls(output_file=None, alphamin=-1.25, alphamax=0.25, alphastep=0.01, betamin=-1.10, betamax=1.10, betastep=0.01):
 
     no = NormalOscillator()
 
@@ -126,11 +126,9 @@ def find_admissible_controls(output_file=None, alphamin=-1.00, alphamax=0.05, al
     ncols = len(betarng)
     print '# of (alpha,beta) pairs: %d' % (nrows*ncols)
 
-    total_mem = ((nrows*ncols*2)+(nrows*ncols*3*2)*8.0) / 1024.0**2
-    print 'Total Memory: %0.0f MB' % total_mem
-
     all_pairs = np.zeros([nrows, ncols, 2])
     all_dv_rms = np.zeros([nrows, ncols]) * np.nan
+    all_ff = np.zeros([nrows, ncols]) * np.nan
 
     sim_duration = 0.010
     step_size = 1e-6
@@ -145,6 +143,16 @@ def find_admissible_controls(output_file=None, alphamin=-1.00, alphamax=0.05, al
             dv_rms = dv[steady_state_index:].std(ddof=1)
             all_dv_rms[i, j] = dv_rms
 
+            #compute power spectrum
+            fftx = fft(output[:, 0])
+            ps_f = fftfreq(len(output[:, 0]), d=step_size)
+            findx = (ps_f > 100.0) & (ps_f < 8000.0)
+
+            #estimate fundamental frequency from log power spectrum in the simplest way possible
+            ps = np.abs(fftx[findx])
+            peak_index = ps.argmax()
+            all_ff[i, j] = ps_f[findx][peak_index]
+
     etime = time.time() - stime
     print 'Elapsed Time: %0.2f s' % etime
 
@@ -152,18 +160,22 @@ def find_admissible_controls(output_file=None, alphamin=-1.00, alphamax=0.05, al
         hf = h5py.File(output_file, 'w')
         hf['all_pairs'] = all_pairs
         hf['all_dv_rms'] = all_dv_rms
+        hf['all_ff'] = all_ff
         hf.close()
 
 
-def plot_dv_rms(dv_file):
+def plot_ff(dv_file, dv_rms_thresh=1e-2):
 
     hf = h5py.File(dv_file, 'r')
     all_pairs = np.array(hf['all_pairs'])
     all_dv_rms = np.array(hf['all_dv_rms'])
+    all_ff = np.array(hf['all_ff'])
     hf.close()
 
     alpha = all_pairs[:, :, 0]
     beta = all_pairs[:, :, 1]
+
+    all_ff[all_dv_rms < dv_rms_thresh] = 0.0
 
     alpha_y = alpha[:, 0]
     beta_x = beta[0, :]
@@ -171,13 +183,13 @@ def plot_dv_rms(dv_file):
     xtick_rng = range(0, len(beta_x), 8)
 
     plt.figure()
-    plt.imshow(all_dv_rms, interpolation='nearest', aspect='auto')
+    plt.imshow(all_ff, interpolation='nearest', aspect='auto')
     plt.colorbar()
     plt.xticks(xtick_rng, ['%0.2f' % x for x in beta_x[xtick_rng]])
     plt.yticks(ytick_rng, ['%0.2f' % y for y in alpha_y[ytick_rng]])
     plt.xlabel('Beta')
     plt.ylabel('Alpha')
-    plt.title('# of Fixed Points')
+    plt.title('Fundamental Frequency')
 
 
 def plot_fixedpoints(fp_file):

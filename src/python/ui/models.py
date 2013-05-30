@@ -1,10 +1,12 @@
 
 from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QSlider
+from PyQt4.QtGui import QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QSlider, QWidget
+
+import numpy as np
 
 import matplotlib.pyplot as plt
 
-from oscillators import NormalOscillator
+from oscillators import NormalOscillator, PhysicalOscillator
 from sound import WavFile
 from ui.mpl_figure import MplFigure
 
@@ -25,11 +27,29 @@ class NormalOscillatorModel(OscillatorModel):
         self.oscillator = NormalOscillator()
 
         self.control_params = dict()
-        self.control_params['alpha'] = ControlParameter('alpha', [-0.70, 0.05], -0.41769)
-        self.control_params['beta'] = ControlParameter('beta', [-0.40, 0.40], -0.346251775)
+        self.control_params['alpha'] = ControlParameter('alpha', [-1.25, 0.05], -0.41769)
+        self.control_params['beta'] = ControlParameter('beta', [-0.75, 0.75], -0.346251775)
 
     def get_control_param_names(self):
         return ['alpha', 'beta']
+
+    def get_control_params(self):
+        return self.control_params
+
+
+class PhysicalOscillatorModel(OscillatorModel):
+
+    def __init__(self):
+        OscillatorModel.__init__(self)
+        self.oscillator = PhysicalOscillator()
+
+        self.control_params = dict()
+        self.control_params['psub'] = ControlParameter('psub', [1800.0, 2100.0], 1900.0)
+        self.control_params['k1'] = ControlParameter('k1', [0.005, 0.75], 0.016)
+        self.control_params['f0'] = ControlParameter('f0', [-0.05, 0.05], 0.0399)
+
+    def get_control_param_names(self):
+        return ['psub', 'k1', 'f0']
 
     def get_control_params(self):
         return self.control_params
@@ -64,7 +84,7 @@ class ControlParameter(object):
         self.set_slider_value(self.current_val)
 
     def create_widget(self, parent=None):
-        mlayout = QVBoxLayout()
+        mlayout = QVBoxLayout(parent)
 
         hlayout = QHBoxLayout()
         plabel = QLabel()
@@ -86,7 +106,7 @@ class ControlParameter(object):
 
         return mlayout
 
-ALL_MODELS = {'Normal': NormalOscillatorModel()}
+ALL_MODELS = {'Normal': NormalOscillatorModel(), 'Physical': PhysicalOscillatorModel()}
 
 
 class SimulationOutput(object):
@@ -121,7 +141,10 @@ class SimulationOutput(object):
         ax.set_ylabel('v(t)')
 
         ax = fig.add_subplot(gs[40:54])
+        ff = self.wav_file.fundamental_freq
+        ff_index = (np.where(self.wav_file.power_spectrum_f == ff)[0]).min()
         ax.plot(self.wav_file.power_spectrum_f, self.wav_file.power_spectrum, 'k-')
+        ax.plot(ff, self.wav_file.power_spectrum[ff_index], 'ro')
         ax.set_xlabel('Time (s)')
         ax.set_ylabel('log10(power)')
 

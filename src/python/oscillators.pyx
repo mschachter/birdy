@@ -40,6 +40,16 @@ cdef class PhysicalOscillator:
     def __dealloc__(self):
         pass
 
+    def run_simulation(self, cparams, duration, dt):
+        if 'psub' not in cparams:
+            raise Exception('psub parameter must be supplied for run_simulation')
+        if 'k1' not in cparams:
+            raise Exception('k1 parameter must be supplied for run_simulation')
+        if 'f0' not in cparams:
+            raise Exception('f0 parameter must be supplied for run_simulation')
+
+        return self.simulate(0.0, 0.0, duration, dt, k1=cparams['k1'], psub=cparams['psub'], f0=cparams['f0'])
+
     cpdef simulate(self, double initial_x, double initial_v, double duration, double dt,
                          double k1 = 0.016, double psub = 1900.0, double f0 = 0.0399):
 
@@ -92,12 +102,12 @@ cdef class NormalOscillator:
         normal_oscillator_delete(pp)
         return ndx
 
-    def run_simulation(self, cparams, duration, dt):
+    def run_simulation(self, cparams, duration, dt, initial_x=0.0, initial_v=0.0):
         if 'alpha' not in cparams:
             raise Exception('alpha parameter must be supplied for run_simulation')
         if 'beta' not in cparams:
             raise Exception('beta parameter must be supplied for run_simulation')
-        return self.simulate(0.0, 0.0, duration, dt, alpha=cparams['alpha'], beta=cparams['beta'])
+        return self.simulate(initial_x, initial_v, duration, dt, alpha=cparams['alpha'], beta=cparams['beta'])
 
     cpdef simulate(self, double initial_x, double initial_v, double duration, double dt,
                          double alpha=-0.41769, double beta=-0.346251775):

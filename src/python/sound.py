@@ -52,6 +52,11 @@ class WavFile():
         self.power_spectrum = np.log10(np.abs(fftx[findx]))
         self.power_spectrum_f = ps_f[findx]
 
+        #estimate fundamental frequency from log power spectrum in the simplest way possible
+        ps = np.abs(fftx[findx])
+        peak_index = ps.argmax()
+        self.fundamental_freq = self.power_spectrum_f[peak_index]
+
         #compute spectrogram
         t,f,spec,spec_rms = log_spectrogram(self.data, self.sample_rate, spec_sample_rate=spec_sample_rate, freq_spacing=freq_spacing, min_freq=min_freq, max_freq=max_freq)
         self.spectrogram_t = t

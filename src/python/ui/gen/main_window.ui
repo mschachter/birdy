@@ -39,7 +39,7 @@
            <x>0</x>
            <y>0</y>
            <width>291</width>
-           <height>321</height>
+           <height>401</height>
           </rect>
          </property>
          <property name="styleSheet">
@@ -93,19 +93,77 @@
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>90</y>
+            <y>150</y>
             <width>271</width>
-            <height>211</height>
+            <height>241</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="oscillatorParametersLayout"/>
+         </widget>
+         <widget class="QLabel" name="initialXHelpLabel">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>80</y>
+            <width>66</width>
+            <height>17</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>x(0):</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+         <widget class="QLabel" name="initialVHelpLabel">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>110</y>
+            <width>66</width>
+            <height>17</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>v(0):</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="initialXEdit">
+          <property name="geometry">
+           <rect>
+            <x>100</x>
+            <y>80</y>
+            <width>113</width>
+            <height>27</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>0.0</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="initialVEdit">
+          <property name="geometry">
+           <rect>
+            <x>100</x>
+            <y>110</y>
+            <width>113</width>
+            <height>27</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>0.0</string>
+          </property>
          </widget>
         </widget>
         <widget class="QGroupBox" name="simulatorGroupBox">
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>330</y>
+           <y>410</y>
            <width>291</width>
            <height>121</height>
           </rect>

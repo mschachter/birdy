@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_window.ui'
 #
-# Created: Wed May 29 14:38:00 2013
+# Created: Thu May 30 16:04:58 2013
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -31,7 +31,7 @@ class Ui_MainWindow(object):
         self.tab = QtGui.QWidget()
         self.tab.setObjectName(_fromUtf8("tab"))
         self.oscilatorParamsGroupBox = QtGui.QGroupBox(self.tab)
-        self.oscilatorParamsGroupBox.setGeometry(QtCore.QRect(0, 0, 291, 321))
+        self.oscilatorParamsGroupBox.setGeometry(QtCore.QRect(0, 0, 291, 401))
         self.oscilatorParamsGroupBox.setStyleSheet(_fromUtf8("QGroupBox { \n"
 "     border: 2px solid gray; \n"
 "     border-radius: 3px; \n"
@@ -51,13 +51,27 @@ class Ui_MainWindow(object):
         self.modelComboBox.setGeometry(QtCore.QRect(40, 50, 221, 27))
         self.modelComboBox.setObjectName(_fromUtf8("modelComboBox"))
         self.verticalLayoutWidget = QtGui.QWidget(self.oscilatorParamsGroupBox)
-        self.verticalLayoutWidget.setGeometry(QtCore.QRect(10, 90, 271, 211))
+        self.verticalLayoutWidget.setGeometry(QtCore.QRect(10, 150, 271, 241))
         self.verticalLayoutWidget.setObjectName(_fromUtf8("verticalLayoutWidget"))
         self.oscillatorParametersLayout = QtGui.QVBoxLayout(self.verticalLayoutWidget)
         self.oscillatorParametersLayout.setMargin(0)
         self.oscillatorParametersLayout.setObjectName(_fromUtf8("oscillatorParametersLayout"))
+        self.initialXHelpLabel = QtGui.QLabel(self.oscilatorParamsGroupBox)
+        self.initialXHelpLabel.setGeometry(QtCore.QRect(30, 80, 66, 17))
+        self.initialXHelpLabel.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.initialXHelpLabel.setObjectName(_fromUtf8("initialXHelpLabel"))
+        self.initialVHelpLabel = QtGui.QLabel(self.oscilatorParamsGroupBox)
+        self.initialVHelpLabel.setGeometry(QtCore.QRect(30, 110, 66, 17))
+        self.initialVHelpLabel.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.initialVHelpLabel.setObjectName(_fromUtf8("initialVHelpLabel"))
+        self.initialXEdit = QtGui.QLineEdit(self.oscilatorParamsGroupBox)
+        self.initialXEdit.setGeometry(QtCore.QRect(100, 80, 113, 27))
+        self.initialXEdit.setObjectName(_fromUtf8("initialXEdit"))
+        self.initialVEdit = QtGui.QLineEdit(self.oscilatorParamsGroupBox)
+        self.initialVEdit.setGeometry(QtCore.QRect(100, 110, 113, 27))
+        self.initialVEdit.setObjectName(_fromUtf8("initialVEdit"))
         self.simulatorGroupBox = QtGui.QGroupBox(self.tab)
-        self.simulatorGroupBox.setGeometry(QtCore.QRect(0, 330, 291, 121))
+        self.simulatorGroupBox.setGeometry(QtCore.QRect(0, 410, 291, 121))
         self.simulatorGroupBox.setStyleSheet(_fromUtf8("QGroupBox { \n"
 "     border: 2px solid gray; \n"
 "     border-radius: 3px; \n"
@@ -106,6 +120,10 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "MainWindow", None, QtGui.QApplication.UnicodeUTF8))
         self.oscilatorParamsGroupBox.setTitle(QtGui.QApplication.translate("MainWindow", "Oscillator Parameters", None, QtGui.QApplication.UnicodeUTF8))
         self.modelHelpLabel.setText(QtGui.QApplication.translate("MainWindow", "Model:", None, QtGui.QApplication.UnicodeUTF8))
+        self.initialXHelpLabel.setText(QtGui.QApplication.translate("MainWindow", "x(0):", None, QtGui.QApplication.UnicodeUTF8))
+        self.initialVHelpLabel.setText(QtGui.QApplication.translate("MainWindow", "v(0):", None, QtGui.QApplication.UnicodeUTF8))
+        self.initialXEdit.setText(QtGui.QApplication.translate("MainWindow", "0.0", None, QtGui.QApplication.UnicodeUTF8))
+        self.initialVEdit.setText(QtGui.QApplication.translate("MainWindow", "0.0", None, QtGui.QApplication.UnicodeUTF8))
         self.simulatorGroupBox.setTitle(QtGui.QApplication.translate("MainWindow", "Simulation", None, QtGui.QApplication.UnicodeUTF8))
         self.stepSizeHelpLabel.setText(QtGui.QApplication.translate("MainWindow", "Step Size:", None, QtGui.QApplication.UnicodeUTF8))
         self.stepSizeEdit.setText(QtGui.QApplication.translate("MainWindow", "0.000001", None, QtGui.QApplication.UnicodeUTF8))
