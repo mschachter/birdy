@@ -29,7 +29,7 @@ int normal_oscillator_rhs(double t, const double state[], double dstate[], void*
     double gamma2 = gamma*gamma;
 
     dstate[0] = v;
-    dstate[1] = gamma2*pp->alpha + gamma2*pp->beta*x + gamma2*x2 - gamma*x*v - gamma*x3 - gamma*x2*v;
+    dstate[1] = gamma2*pp->alpha + gamma2*pp->beta*x + gamma2*x2 - gamma*x*v - gamma2*x3 - gamma*x2*v;
 
     return GSL_SUCCESS;
 }

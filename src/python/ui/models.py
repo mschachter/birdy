@@ -27,7 +27,7 @@ class NormalOscillatorModel(OscillatorModel):
         self.oscillator = NormalOscillator()
 
         self.control_params = dict()
-        self.control_params['alpha'] = ControlParameter('alpha', [-1.25, 0.05], -0.41769)
+        self.control_params['alpha'] = ControlParameter('alpha', [-1.25, 0.20], -0.41769)
         self.control_params['beta'] = ControlParameter('beta', [-0.75, 0.75], -0.346251775)
 
     def get_control_param_names(self):
