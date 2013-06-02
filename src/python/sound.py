@@ -55,7 +55,11 @@ class WavFile():
         #estimate fundamental frequency from log power spectrum in the simplest way possible
         ps = np.abs(fftx[findx])
         peak_index = ps.argmax()
-        self.fundamental_freq = self.power_spectrum_f[peak_index]
+        try:
+            self.fundamental_freq = self.power_spectrum_f[peak_index]
+        except IndexError:
+            print 'Could not identify fundamental frequency!'
+            self.fundamental_freq = 0.0
 
         #compute spectrogram
         t,f,spec,spec_rms = log_spectrogram(self.data, self.sample_rate, spec_sample_rate=spec_sample_rate, freq_spacing=freq_spacing, min_freq=min_freq, max_freq=max_freq)
@@ -64,26 +68,36 @@ class WavFile():
         self.spectrogram = spec
         self.spectrogram_rms = spec_rms
 
-    def plot(self, fig=None):
+    def plot(self, fig=None, show_rms=True):
 
         self.analyze()
+
+        if show_rms:
+            spw_size = 15
+            spec_size = 35
+        else:
+            spw_size = 25
+            spec_size = 75
 
         if fig is None:
             fig = plt.figure()
         gs = plt.GridSpec(100, 1)
-        ax = fig.add_subplot(gs[:15])
+        ax = fig.add_subplot(gs[:spw_size])
         plt.plot(self.data_t, self.data, 'k-')
         plt.axis('tight')
         plt.ylabel('Sound Pressure')
 
-        ax = fig.add_subplot(gs[20:55])
+        s = (spw_size+5)
+        e = s + spec_size
+        ax = fig.add_subplot(gs[s:e])
         self.plot_spectrogram()
 
-        ax = fig.add_subplot(gs[60:95])
-        plt.plot(self.spectrogram_t, self.spectrogram_rms, 'g-')
-        plt.xlabel('Time (s)')
-        plt.ylabel('RMS')
-        plt.axis('tight')
+        if show_rms:
+            ax = fig.add_subplot(gs[(e+5):95])
+            plt.plot(self.spectrogram_t, self.spectrogram_rms, 'g-')
+            plt.xlabel('Time (s)')
+            plt.ylabel('RMS')
+            plt.axis('tight')
 
     def plot_spectrogram(self, ax=None):
         if ax is None:

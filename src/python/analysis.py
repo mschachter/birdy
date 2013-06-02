@@ -3,6 +3,7 @@ import numpy as np
 
 from scipy.optimize import newton
 from scipy.fftpack import fft,fftfreq
+from scipy.integrate import ode
 
 import matplotlib.pyplot as plt
 import operator
@@ -219,9 +220,3 @@ def plot_fixedpoints(fp_file):
     plt.title('# of Fixed Points')
 
     return alpha,beta,fixed_points,num_fixed_points
-
-
-
-
-
-

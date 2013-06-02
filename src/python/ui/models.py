@@ -145,7 +145,7 @@ class SimulationOutput(object):
         ff_index = (np.where(self.wav_file.power_spectrum_f == ff)[0]).min()
         ax.plot(self.wav_file.power_spectrum_f, self.wav_file.power_spectrum, 'k-')
         ax.plot(ff, self.wav_file.power_spectrum[ff_index], 'ro')
-        ax.set_xlabel('Time (s)')
+        ax.set_xlabel('Frequency (Hz)')
         ax.set_ylabel('log10(power)')
 
         ax = fig.add_subplot(gs[60:94])
