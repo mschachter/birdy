@@ -121,10 +121,10 @@ requires a larger window of time than computing $\sigma_j$ if $i < j$.
 Finding the optimal control requires maximizing a conditional probability:
 
 \begin{align*}
-\argmin_{\bm{u}} C_f = \argmax_{\bm{u}} p \left( \bm{u} | \sigma_1, ..., \sigma_m \right)
+\argmin_{\bm{u}} C_f = \argmax_{\bm{\phi}(\bm{u})} p \left( \bm{\phi}(\bm{u}) | \sigma_1, ..., \sigma_m \right)
 \end{align*}
 
-There may be a "telescoping" algorithm to maximizing $p \left( \bm{u} | \sigma_1, ..., \sigma_m \right)$
+There may be a "telescoping" algorithm to maximizing $p \left( \bm{\phi}(\bm{u}) | \sigma_1, ..., \sigma_m \right)$
 quickly. Start with $\sigma_1$, which is the statistic with the longest time scale.
 There should be many instantaneous values of $\bm{u}(t)$ that give a nonzero
 probability of occurance with $\sigma_1$. But not all the values will, so restrict the
