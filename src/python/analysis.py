@@ -3,7 +3,6 @@ import numpy as np
 
 from scipy.optimize import newton
 from scipy.fftpack import fft,fftfreq
-from scipy.integrate import ode
 
 import matplotlib.pyplot as plt
 import operator
@@ -115,7 +114,7 @@ def find_fixedpoints_grid_normal(output_file=None, xmin=-10.0, xmax=10.0, xstep=
         hf.close()
 
 
-def find_admissible_controls(output_file=None, alphamin=-1.25, alphamax=0.25, alphastep=0.01, betamin=-1.10, betamax=1.10, betastep=0.01):
+def find_admissible_controls(output_file=None, alphamin=-1.25, alphamax=0.25, alphastep=0.01, betamin=-1.50, betamax=1.50, betastep=0.01):
 
     no = NormalOscillator()
 

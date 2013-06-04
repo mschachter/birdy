@@ -4,6 +4,7 @@
 \usepackage{url}
 \usepackage{amsmath}
 \usepackage{bm}
+\usepackage{bbm}
 
 \DeclareMathOperator*{\argmin}{\arg\!\min}
 \DeclareMathOperator*{\argmax}{\arg\!\max}
@@ -12,7 +13,7 @@
 
 \author{
 Mike ~Schachter
-\thanks{ With much help from H\'{e}di Soula:
+\thanks{ With a metric ton of help and code from H\'{e}di Soula:
 \texttt{hsoula@gmail.com}} \\
 Helen Wills Neuroscience Institute\\
 University of California, Berkeley\\
@@ -68,8 +69,7 @@ The control parameters of the model are $\alpha$ and $\beta$. $\gamma$ = 23500 i
 \subsection{Control of the Syrinx Model}
 
 The goal is to control the parameters $\alpha$ and $\beta$ in order to produce an observed
-vocalization. Let $\bm{\phi}(t) = \left[ \alpha(t) ~ \beta(t) \right]^T$ be the state vector. Let
-$F_f(t)$ be the observed fundamental frequency at time $t$.
+vocalization. Let $\bm{\phi}(t) = \left[ \alpha(t) ~ \beta(t) \right]^T$ be the state vector.
 
 Assume that the temporal evolution of $\bm{\phi}(t)$ is defined by a controlled linear dynamical
 system:
@@ -80,31 +80,45 @@ system:
 
 where $A$ is a 2x2 matrix, chosen to make the passive dynamics of the control system decay
 to some physiologically relevant rest state. $B$ is a 2x2 control matrix, chosen to be the
-identity matrix for simplicity.
+identity matrix for simplicity. Note that the time-scale for simulation the oscillator is
+much finer than that of the control. Let $\Delta\tau$ be the time step for simulation of
+the control system, and define $t_k = k\Delta\tau$.
 
-In optimal control theory, a cost function is specified and is to be minized over time to
-produce an optimal control law. The time-scale of the simulation will be much finer than
-that of the control. Let $\Delta\tau$ be the time step for simulation of the control system,
-and define $t_k = t - k\Delta\tau$. We then define the instantaneous cost function as:
+In optimal control theory, a cost function is specified and is to be minimized over time to
+produce an optimal control law. But what form should the cost function take? We'll make
+the following assumptions:
+
+\begin{enumerate}
+
+\item The control wants to keep the system's instantaneous energy low: $\bm{\phi}(t_k)^T \bm{\phi}(t_k)$ .
+\item The control wants to keep it's instantaneous energy low: $\bm{u}^T \bm{u}$ 
+\item The control varies smoothly, i.e. $\left( \bm{\phi}(t_k) - \bm{\phi}(t_{k-1}) \right)^2$ is small.
+\item The control wants to produce an instantaneous fundamental frequency that matches that of a stored template.
+
+\end{enumerate}
+
+To elaborate on the last assumption, say we are given the time-varying fundamental frequency of a song syllable that we would
+like to learn, represented as the function $F_f(t)$. Let $\hat{F}_f = g(\bm{\phi})$ be the function that gives the steady
+state fundamental frequency for a given control $\bm{\phi}$. The function $g$ can be empirically estimated through simulation
+and approximated through interpolation. To follow this frequency means to keep the quantity $\left( F_f - g(\bm{\phi}) \right) ^2$
+small.
+
+Given these assumptions, we can construct the following instantaneous cost function:
 
 \begin{align*}
-C \left( \bm{\phi}(t_{k-1}), F_f(t_k), \bm{u} \right) = \bm{\phi}(t_k)^T Q \bm{\phi}(t_k) + \bm{u}^T R \bm{u} + C_f(F_f(t_k), \bm{\phi}(t_k))
+C \left( \bm{\phi}(t_{k-1}), F_f(t_k), \bm{u} \right) = c_{\bm{\phi}} \bm{\phi}(t_k)^T Q \bm{\phi}(t_k) +
+							c_{\bm{u}} \bm{u}^T \bm{u} +
+							c_s \left( \bm{\phi}(t_k) - \bm{\phi}(t_{k-1}) \right)^2 +
+							c_F \left( F_f - g(\bm{\phi}) \right) ^2
 \end{align*}
 
-where $Q$ and $R$ are 2x2 penalty matrices, $\bm{\phi}(t_k)$ is given as a forward Euler step:
+where $Q$ is a diagonal 2x2 scaling matrix and the $c_* \in \mathbbm{R}$ are weights to keep the magnitudes of each cost within
+a reasonable range. $\bm{\phi}(t_k)$ is given as a forward Euler step:
 
 \begin{align*}
 \bm{\phi}(t_k) = \left( A\bm{x} + B\bm{u} \right) \Delta\tau + \bm{\phi}(t_{k-1})
 \end{align*}
 
-and the cost of getting the right controls for the desired fundamental frequency is defined as:
-
-\begin{align*}
-C_f(F_f, \bm{\phi}) \propto \frac{1}{p \left( F_f | \bm{\phi} \right) }
-\end{align*}
-
-where $p \left( F_f | \bm{\phi} \right)$ is the probability of observing a fundamental frequency $F_f$
-given a control $\bm{\phi}$.
 
 \subsection{Temporal Hierarchy of Representation}
 

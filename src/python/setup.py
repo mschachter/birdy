@@ -6,5 +6,5 @@ sourcefiles = ['oscillators.pyx', '../cpp/common.cpp', '../cpp/physical_oscillat
 
 setup(
     cmdclass = {'build_ext': build_ext},
-    ext_modules = [Extension('oscillators', sourcefiles, libraries=['gsl', 'cblas', 'm'], language='c++')]
+    ext_modules = [Extension('oscillators', sourcefiles, libraries=['gsl', 'gslcblas', 'm'], language='c++')]
 )
