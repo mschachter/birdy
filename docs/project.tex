@@ -75,14 +75,22 @@ Assume that the temporal evolution of $\bm{\phi}(t)$ is defined by a controlled 
 system:
 
 \begin{align*}
-\dot{\bm{\phi}}=A\bm{\phi} + B\bm{u}
+\dot{\bm{\phi}}=A\bm{\phi}(t) + \bm{u}(t)
 \end{align*}
 
 where $A$ is a 2x2 matrix, chosen to make the passive dynamics of the control system decay
-to some physiologically relevant rest state. $B$ is a 2x2 control matrix, chosen to be the
-identity matrix for simplicity. Note that the time-scale for simulation the oscillator is
-much finer than that of the control. Let $\Delta\tau$ be the time step for simulation of
-the control system, and define $t_k = k\Delta\tau$.
+to some physiologically relevant rest state.
+
+We discretized time to simplify the analysis. Let $\Delta\tau$ be the time step for
+simulation of the control system, and define $t_k = k\Delta\tau$. Also define
+$\bm{\phi}_k = \bm{\phi}(t_k)$. Note that the time step for the simulation of the
+control is significantly larger than that of the oscillator. The discrete time map
+representing the control system is given by the forward Euler step:
+
+\begin{align*}
+\bm{\phi}_{k+1} &= \begin{aligned}\left( A\bm{\phi}_k + \bm{u}_k \right) \Delta\tau + \bm{\phi}_{k}\end{aligned} \\
+                &=\begin{aligned}\left( \Delta\tau A + I \right) \bm{\phi}_k + \Delta\tau \bm{u}_k\end{aligned}
+\end{align*}
 
 In optimal control theory, a cost function is specified and is to be minimized over time to
 produce an optimal control law. But what form should the cost function take? We'll make
@@ -90,43 +98,56 @@ the following assumptions:
 
 \begin{enumerate}
 
-\item The control wants to keep the system's instantaneous energy low: $\bm{\phi}(t_k)^T \bm{\phi}(t_k)$ .
-\item The control wants to keep it's instantaneous energy low: $\bm{u}^T \bm{u}$ 
-\item The control varies smoothly, i.e. $\left( \bm{\phi}(t_k) - \bm{\phi}(t_{k-1}) \right)^2$ is small.
+\item The control wants to keep the system's instantaneous energy low: $\bm{\phi}_k^T \bm{\phi}_k$.
+\item The control wants to keep it's own instantaneous energy low: $\bm{u}^T \bm{u}$ 
+\item The control varies smoothly, i.e. $\| \bm{\phi}_k - \bm{\phi}_{k-1} \|$ is small.
 \item The control wants to produce an instantaneous fundamental frequency that matches that of a stored template.
 
 \end{enumerate}
 
-To elaborate on the last assumption, say we are given the time-varying fundamental frequency of a song syllable that we would
-like to learn, represented as the function $F_f(t)$. Let $\hat{F}_f = g(\bm{\phi})$ be the function that gives the steady
-state fundamental frequency for a given control $\bm{\phi}$. The function $g$ can be empirically estimated through simulation
-and approximated through interpolation. To follow this frequency means to keep the quantity $\left( F_f - g(\bm{\phi}) \right) ^2$
-small.
+To elaborate on the last assumption, say we are given the time-varying fundamental frequency
+of a song syllable that we would like to learn, represented as the function $F(t_k)$. Let
+$\hat{F} = g(\bm{\phi}_k)$ be the function that gives the steady state fundamental
+frequency for a given control $\bm{\phi}_k$. The function $g$ can be empirically
+estimated through simulation and approximated through interpolation. To follow this
+frequency means to keep the quantity $\left( F(t_k) - g(\bm{\phi}_k) \right) ^2$ small.
 
-Given these assumptions, we can construct the following instantaneous cost function:
-
-\begin{align*}
-C \left( \bm{\phi}(t_{k-1}), F_f(t_k), \bm{u} \right) = c_{\bm{\phi}} \bm{\phi}(t_k)^T Q \bm{\phi}(t_k) +
-							c_{\bm{u}} \bm{u}^T \bm{u} +
-							c_s \left( \bm{\phi}(t_k) - \bm{\phi}(t_{k-1}) \right)^2 +
-							c_F \left( F_f - g(\bm{\phi}) \right) ^2
-\end{align*}
-
-where $Q$ is a diagonal 2x2 scaling matrix and the $c_* \in \mathbbm{R}$ are weights to keep the magnitudes of each cost within
-a reasonable range. $\bm{\phi}(t_k)$ is given as a forward Euler step:
+Given these assumptions, the cost at time $t_k$ of applying control $\bm{u}$ is:
 
 \begin{align*}
-\bm{\phi}(t_k) = \left( A\bm{x} + B\bm{u} \right) \Delta\tau + \bm{\phi}(t_{k-1})
+\ell_k \left( \bm{\phi}_{k-1}, \bm{u} \right) = \bm{\phi}_{k}^T \bm{\phi}_{k} +
+							\bm{u}^T \bm{u} +
+							\| \bm{\phi}_{k} - \bm{\phi}_{k-1} \| +
+							\left( F(t_k) - g(\bm{\phi}_{k}) \right) ^2
 \end{align*}
 
+Note that the state $\bm{\phi}_k$ is a function of both $\bm{\phi}_{k-1}$ and $\bm{u}$.
+
+Let $N$ be the number of time points we want to control, and let
+$\bm{\pi}_j=\{ \bm{u}_j(\bm{\phi}_{j-1}), ..., \bm{u}_N(\bm{\phi}_{N-1}) \}$ be the control
+law applied from time $j$ to time $N$. Note that the control law is a sequence of
+functions! Each control uses feedback information about most recently observed state.
+The total cost of applying a control law $\bm{\pi}_0$ given initial state
+$\bm{\phi}_0$ is:
+
+\begin{align*}
+v\left( \bm{\phi}_0, \bm{\pi}_0 \right) = \sum_{k=1}^N \ell_k \left( \bm{\phi}_{k-1}, \bm{u}_k \right)
+\end{align*}
+
+The optimal cost-to-go is a function that represents the total cost from a time
+$j$ to time $N$ given that the optimal control function is applied:
+
+\begin{align*}
+v^*_j \left( \bm{\phi}_j \right) = \min_{\bm{\pi}_j} \sum_{k=j}^N \ell_k \left( \bm{\phi}_k, \bm{u}_k \right)
+\end{align*}
 
 \subsection{Temporal Hierarchy of Representation}
 
 Generically, we want to determine a joint probability between $\bm{\phi}$ and a set of
 variables that are related to the acoustic representation. These features may span several
-time scales. For example, instead of just relating $F_f(t)$ and $\bm{\phi}$, i.e. looking
-at the joint distribution $p \left( F_f(t), \bm{\phi} \right)$, we might want to look
-at the running variance of $F_f(t)$ for a specified time window.
+time scales. For example, instead of just relating $F(t)$ and $\bm{\phi}$, i.e. looking
+at the joint distribution $p \left( F(t), \bm{\phi} \right)$, we might want to look
+at the running variance of $F(t)$ for a specified time window.
 
 Let $\{ \sigma_1, ..., \sigma_m \}$ be a set of statistics for some acoustic variables. Construct
 this set so that they are ordered by time scale. By this, we mean that computing $\sigma_i$
