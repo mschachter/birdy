@@ -100,7 +100,7 @@ the following assumptions:
 
 \item The control wants to keep the system's instantaneous energy low: $\bm{\phi}_k^T \bm{\phi}_k$.
 \item The control wants to keep it's own instantaneous energy low: $\bm{u}^T \bm{u}$ 
-\item The control varies smoothly, i.e. $\| \bm{\phi}_k - \bm{\phi}_{k-1} \|$ is small.
+%\item The control varies smoothly, i.e. $\| \bm{\phi}_k - \bm{\phi}_{k-1} \|$ is small.
 \item The control wants to produce an instantaneous fundamental frequency that matches that of a stored template.
 
 \end{enumerate}
@@ -115,24 +115,25 @@ frequency means to keep the quantity $\left( F(t_k) - g(\bm{\phi}_k) \right) ^2$
 Given these assumptions, the cost at time $t_k$ of applying control $\bm{u}$ is:
 
 \begin{align*}
-\ell_k \left( \bm{\phi}_{k-1}, \bm{u} \right) = \bm{\phi}_{k}^T \bm{\phi}_{k} +
+\ell_k \left( \bm{\phi}_{k}, \bm{u} \right) = \bm{\phi}_{k}^T \bm{\phi}_{k} +
 							\bm{u}^T \bm{u} +
-							\| \bm{\phi}_{k} - \bm{\phi}_{k-1} \| +
+							%\| \bm{\phi}_{k} - \bm{\phi}_{k-1} \| +
 							\left( F(t_k) - g(\bm{\phi}_{k}) \right) ^2
 \end{align*}
 
-Note that the state $\bm{\phi}_k$ is a function of both $\bm{\phi}_{k-1}$ and $\bm{u}$.
-
 Let $N$ be the number of time points we want to control, and let
-$\bm{\pi}_j=\{ \bm{u}_j(\bm{\phi}_{j-1}), ..., \bm{u}_N(\bm{\phi}_{N-1}) \}$ be the control
+$\bm{\pi}_j=\{ \bm{u}_j(\bm{\phi}_{j}), ..., \bm{u}_N(\bm{\phi}_{N}) \}$ be the control
 law applied from time $j$ to time $N$. Note that the control law is a sequence of
 functions! Each control uses feedback information about most recently observed state.
 The total cost of applying a control law $\bm{\pi}_0$ given initial state
 $\bm{\phi}_0$ is:
 
 \begin{align*}
-v\left( \bm{\phi}_0, \bm{\pi}_0 \right) = \sum_{k=1}^N \ell_k \left( \bm{\phi}_{k-1}, \bm{u}_k \right)
+v\left( \bm{\phi}_0, \bm{\pi}_0 \right) = \sum_{k=1}^N \ell_k \left( \bm{\phi}_{k}, \bm{u}_k \right)
 \end{align*}
+
+
+\subsection{Dynamic Programming Solution to Optimal Control}
 
 The optimal cost-to-go is a function that represents the total cost from a time
 $j$ to time $N$ given that the optimal control function is applied:
@@ -140,6 +141,46 @@ $j$ to time $N$ given that the optimal control function is applied:
 \begin{align*}
 v^*_j \left( \bm{\phi}_j \right) = \min_{\bm{\pi}_j} \sum_{k=j}^N \ell_k \left( \bm{\phi}_k, \bm{u}_k \right)
 \end{align*}
+
+Dynamic programming is typically used to solve for the optimal cost-to-go. When applying
+DP, we work backwards in time, creating a recursive algorithm that determines the
+functional form of the entire optimal control policy $\bm{\pi}_0^*$. To illustrate
+this, we are going to take $N=2$ with a specified initial condition $\bm{\phi}_0$.
+
+First the solution must be found for $N=2$:
+
+\begin{align*}
+v^*_2 \left( \bm{\phi}_2 \right) = \min_{\bm{u}_2} \ell_2 \left( \bm{\phi}_2, \bm{u}_2 \right)
+\end{align*}
+
+In order to solve this, we have to perform a search over a grid of values for
+$\bm{\phi}_2$. For each value on the grid, we then will use gradient descent
+to minimize $v^*_2 \left( \bm{\phi}_2 \right)$ and find an optimal $\bm{u}_2$.
+The end result is that we have a lookup table of values, giving us a function
+$\bm{u}_2(\bm{\phi}_2)$, and a function $v^*_2 \left( \bm{\phi}_2 \right)$.
+
+The optimal cost-to-go at time $N-1=1$ is
+
+\begin{align*}
+v^*_{1} \left( \bm{\phi}_{1} \right) = \min_{\bm{u}_{1}} \left[ \ell_1 \left( \bm{\phi}_{1}, \bm{u}_{1} \right) + v^*_2 \left( \bm{\phi}_2 \right) \right]
+\end{align*}
+
+We know the functional form of $\ell_1 \left( \bm{\phi}_{1}, \bm{u}_{1} \right)$ and the
+numerical form of $v^*_2 \left( \bm{\phi}_2 \right)$. We also know that:
+
+\begin{align*}
+\bm{\phi}_2 = \left( A\bm{\phi}_1 + \bm{u}_1 \right) \Delta\tau + \bm{\phi}_1
+\end{align*}
+
+so we can again use gradient descent for a grid on $\bm{\phi}_1$ to create a lookup
+table for $\bm{u}_1(\bm{\phi}_1)$ and $v^*_1 \left( \bm{\phi}_1 \right)$. We now have
+a functional form for the optimal control policy: $\bm{\pi}_0^* = \{ \bm{u}_1(\bm{\phi}_1), \bm{u}_2(\bm{\phi}_2) \}$
+
+Now going foward in time, with the knowledge of a start state $\bm{\phi}_0$, we can then
+compute $\bm{\phi}_1$, and then the optimal control $\bm{u}_1 \left( \bm{\phi}_1 \right)$.
+Given $\bm{u}_1$, we can then compute $\bm{\phi}_2$ and then $\bm{u}_2$. The techinque,
+albeit expensive, is generally applicable for any $N$.
+
 
 \subsection{Temporal Hierarchy of Representation}
 
