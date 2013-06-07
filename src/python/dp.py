@@ -8,14 +8,15 @@ import matplotlib.pyplot as plt
 
 class CostToGo(object):
 
-    def __init__(self, system):
+    def __init__(self, system, dt=0.001):
         self.system = system
         self.next_c2g = None
+        self.dt = dt
 
     def c2g(self, x, u):
         l = np.dot(x, x) + np.dot(u, u)
         if self.next_c2g is not None:
-            xnext = self.system.rhs(x, u)
+            xnext = self.system.rhs(x, u)*self.dt + x
             l += self.next_c2g.optimal_c2g(xnext)
         return l
 
@@ -23,13 +24,13 @@ class CostToGo(object):
         #interpolate lookup table to find the lowest cost for x
         pass
 
-    def compute_optimal_control(self, x):
+    def compute_optimal_control(self, x, step_size=1e-3, max_iter=1000):
         #find the optimal control at this time point by minimizing the cost-to-go
         m = CostToGoModel(self, x)
-        tgd = ThresholdGradientDescent(m, step_size=1e-6, threshold=0.0)
-        niter = 100
-        for k in range(niter):
+        tgd = ThresholdGradientDescent(m, step_size=step_size, threshold=0.0)
+        while not tgd.converged and tgd.iter < max_iter:
             tgd.iterate()
+            print '[%d]: cost=%0.6f' % (tgd.iter, tgd.errors[-1])
         optimal_u = tgd.best_params
         return optimal_u
 
@@ -41,10 +42,10 @@ class CostToGoModel(object):
 
     def __init__(self, c2g_obj, x):
         self.c2g = c2g_obj
-        self.x = x
+        self.params = x
 
     def error(self, u):
-        return self.c2g.c2g(self.x, u)
+        return self.c2g.c2g(self.params, u)
 
     def grad(self, u):
         return finite_diff_grad(self.error, u)
@@ -75,18 +76,7 @@ class LinearSystem(object):
 
     def phase_plot(self, alphamin=-1.25, alphamax=0.05, betamin=-1.25, betamax=1.25):
         fig = plt.figure()
-        """
-        values = np.linspace(0.3, 0.9, 5)                          # position of X0 between X_f0 and X_f1
-        vcolors = plt.cm.autumn_r(np.linspace(0.3, 1., len(values)))  # colors for each trajectory
-        # plot trajectories
-        for v, col in zip(values, vcolors):
-            X0 = v * X_f1                               # starting point
-            X = integrate.odeint( dX_dt, X0, t)         # we don't need infodict here
-            plt.plot( X[:,0], X[:,1], lw=3.5*v, color=col, label='X0=(%.f, %.f)' % ( X0[0], X0[1]) )
-        """
-
         nb_points = 30
-
         x = np.linspace(alphamin, alphamax, nb_points)
         y = np.linspace(betamin, betamax, nb_points)
 
@@ -168,7 +158,7 @@ class ThresholdGradientDescent(object):
 
         self.params = self.params - self.step_size*g
 
-        #compute error, check for convergence
+        #compute error, check for convergenc
         e = self.model.error(self.params)
         self.errors.append(e)
 
