@@ -177,9 +177,9 @@ so we can again use gradient descent for a grid on $\bm{\phi}_1$ to create a loo
 table for $\bm{u}_1(\bm{\phi}_1)$ and $v^*_1 \left( \bm{\phi}_1 \right)$. We now have
 a functional form for the optimal control policy: $\bm{\pi}_0^* = \{ \bm{u}_1(\bm{\phi}_1), \bm{u}_2(\bm{\phi}_2) \}$
 
-Now going foward in time, with the knowledge of a start state $\bm{\phi}_0$, we can then
+Now going foward in time, with the knowledge of a start state $\bm{\phi}_0$, we can 
 compute $\bm{\phi}_1$, and then the optimal control $\bm{u}_1 \left( \bm{\phi}_1 \right)$.
-Given $\bm{u}_1$, we can then compute $\bm{\phi}_2$ and then $\bm{u}_2$. The techinque
+Given $\bm{u}_1$, we can then compute $\bm{\phi}_2$ and then $\bm{u}_2$. The technique
 is generally applicable for any $N$.
 
 
@@ -202,21 +202,21 @@ $\{ \psi_1, ..., \psi_M \}$. Each basis function takes the form:
 
 where $\bm{\theta}_i$ is the center of the basis function, $\sigma_i$ is the bandwidth of
 the basis function. Each basis function is multiplied by a coefficient
-$\bm{c}_i = \left[ c_{i1} ~ c_{i2} \right]^T$. Let $\bm{c}=\{\bm{c}_1, ... ,\bm{c}_M \}$
-be the set of all coefficients, the control is computed for a given $\bm{c}$ as:
+$\bm{c}_i = \left[ c_{i1} ~ c_{i2} \right]^T$. Let $\bm{C}=\left[ \bm{c}_1, ... ,\bm{c}_M \right]$
+be the set of all coefficients, the control is computed for a given $\bm{C}$ as:
 
 \begin{align*}
-\bm{u}_k(\bm{\phi}_k, \bm{c}) = \sum_{i=1}^M \bm{c}_i \psi_i(\bm{\phi}_k)
+\bm{u}_k(\bm{\phi}_k, \bm{C}) = \sum_{i=1}^M \bm{c}_i \psi_i(\bm{\phi}_k)
 \end{align*}
 
 We then formulate a single optimization problem to minimize the sum of cost
-across all points in $\mathcal{P}$ for a given $\bm{c}$:
+across all points in $\mathcal{P}$ for a given $\bm{C}$:
 
 \begin{align*}
-\bm{c}^* = \argmin_{\bm{c}} \sum_{\bm{\phi} \in \mathcal{P}} v_k( \bm{\phi}, \bm{c} )
+\bm{C}^* = \argmin_{\bm{C}} \sum_{\bm{\phi} \in \mathcal{P}} v_k( \bm{\phi}, \bm{C} )
 \end{align*}
 
-The optimal control at time $t_k$ is then given as $\bm{u}_k(\bm{\phi}_k, \bm{c}^*)$.
+The optimal control at time $t_k$ is then given as $\bm{u}_k(\bm{\phi}_k, \bm{C}^*)$.
 
 To create an initial guess for the optimization problem, each $\bm{c}_i$ is initialized
 independently by finding the minimum cost control at $\bm{\theta}_i$, the center of

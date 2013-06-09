@@ -8,37 +8,80 @@ import matplotlib.pyplot as plt
 
 class CostToGo(object):
 
-    def __init__(self, system, dt=0.001):
+    def __init__(self, system, ff_rbf, ff_desired, dt=0.001, umin=-1.0, umax=1.0, ustep=0.1, bandwidth=0.2):
+
         self.system = system
         self.next_c2g = None
         self.dt = dt
+        self.ff_rbf = ff_rbf
+        self.ff_desired = ff_desired
+
+        u1 = np.arange(umin, umax+ustep, ustep)
+        u2 = np.arange(umin, umax+ustep, ustep)
+        U1,U2 = np.meshgrid(u1, u2)
+        centers = np.array(zip(U1.ravel(), U2.ravel()))
+
+        self.control = RBControlFunction(centers, bandwidths=bandwidth)
+
+        #grid to evaluate RBF cost function
+        alpha = np.arange(-1.25, -0.05, 0.05)
+        beta = np.arange(-1.10, 1.10, 0.05)
+        A,B = np.meshgrid(alpha, beta)
+        self.rbf_eval_points = np.array(zip(A.ravel(), B.ravel()))
+        self.rbf_num_eval_points = self.rbf_eval_points.shape[0]
 
     def c2g(self, x, u):
-        l = np.dot(x, x) + np.dot(u, u)
+        fcost = (self.ff_rbf(x) - self.ff_desired)**2 / (5000.0**2)
+        l = np.dot(x, x) + np.dot(u, u) + fcost
         if self.next_c2g is not None:
             xnext = self.system.rhs(x, u)*self.dt + x
             l += self.next_c2g.optimal_c2g(xnext)
         return l
 
     def optimal_c2g(self, x):
-        #interpolate lookup table to find the lowest cost for x
-        pass
+        u = self.control.evaluate(x)
+        return self.c2g(x, u)
 
-    def compute_optimal_control(self, x, step_size=1e-3, max_iter=1000):
-        #find the optimal control at this time point by minimizing the cost-to-go
-        m = CostToGoModel(self, x)
+    def optimal_c2g_objective(self, C):
+        cost_sum = 0.0
+        Cm = C.reshape(2, len(self.control.centers))
+        for x in self.rbf_eval_points:
+            cost_sum += self.control.evaluate(x, Cm)
+        return cost_sum / self.rbf_num_eval_points
+
+    def compute_optimal_control_rbf(self, step_size=1e-3, max_iter=1000):
+        #generate an initial guess by optimizing at each RBF center
+        for k,ci in enumerate(self.ff_rbf.centers):
+            ui = self.compute_optimal_control_single(ci)
+            self.control.C[:, k] = ui
+
+        #do global optimization across RBF centers
+        C0 = self.control.C.ravel()
+        m = RBFCostToGoModel(self, C0)
+        tgd = ThresholdGradientDescent(m, step_size=step_size, threshold=0.0)
+        while not tgd.converged and tgd.iter < max_iter:
+            tgd.iterate()
+            print '[%d]: avg. cost=%0.6f' % (tgd.iter, tgd.errors[-1])
+        Cstar = tgd.best_params
+        self.control.C = Cstar.reshape(2, len(self.control.centers))
+
+    def compute_optimal_control_single(self, x, step_size=1e-3, max_iter=1000):
+        """
+            Compute the optimal control at a single point.
+        """
+        m = SingleCostToGoModel(self, x)
         tgd = ThresholdGradientDescent(m, step_size=step_size, threshold=0.0)
         while not tgd.converged and tgd.iter < max_iter:
             tgd.iterate()
             print '[%d]: cost=%0.6f' % (tgd.iter, tgd.errors[-1])
-        optimal_u = tgd.best_params
-        return optimal_u
+        ustar = tgd.best_params
+        return ustar
 
     def set_next(self, c2g_obj):
         self.next_c2g = c2g_obj
 
 
-class ControlFunction(object):
+class RBControlFunction(object):
     """ Nonparametric representation of feedback control for a single time point. Modeled as
         a combination of radial basis functions.
     """
@@ -47,28 +90,28 @@ class ControlFunction(object):
         self.M = len(centers)
         self.bandwidths = bandwidths
         self.centers = centers
-        assert len(bandwidths) == len(centers)
 
         if coefficients is None:
-            self.C = np.zeros([self.M, 2])
+            self.C = np.zeros([2, self.M])
         else:
             self.C = coefficients
         assert self.C.shape[0] == self.M
 
-    def evaluate(self, x):
-        assert len(x) == 2
+    def evaluate(self, x, C=None):
 
-        u = np.zeros([2])
-        for i in range(self.M):
-            theta = self.centers[i]
-            r = np.linalg.norm(x - theta)
-            sigma = self.bandwidths[i]
-            u += self.C[i, :] * np.exp(-r**2 / sigma**2)
+        Cused = self.C
+        if C is not None:
+            Cused = C
+
+        r = ( (self.centers - x)**2 ).sum(axis=0)
+        w = np.exp(r / self.bandwidths**2)
+        cc = Cused * w
+        u = cc.sum(axis=1)
 
         return u
 
 
-class CostToGoModel(object):
+class SingleCostToGoModel(object):
 
     def __init__(self, c2g_obj, x):
         self.c2g = c2g_obj
@@ -79,6 +122,19 @@ class CostToGoModel(object):
 
     def grad(self, u):
         return finite_diff_grad(self.error, u)
+
+
+class RBFCostToGoModel(object):
+
+    def __init__(self, c2g_obj, C0):
+        self.c2g = c2g_obj
+        self.params = C0
+
+    def error(self, C):
+        return self.c2g.optimal_c2g_objective(C)
+
+    def grad(self, C):
+        return finite_diff_grad(self.c2g.optimal_c2g_objective, C)
 
 
 class LinearSystem(object):
