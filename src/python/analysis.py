@@ -3,6 +3,7 @@ import numpy as np
 
 from scipy.optimize import newton
 from scipy.fftpack import fft,fftfreq
+from scipy.interpolate import Rbf
 
 import matplotlib.pyplot as plt
 import operator
@@ -162,6 +163,52 @@ def find_admissible_controls(output_file=None, alphamin=-1.25, alphamax=0.25, al
         hf['all_dv_rms'] = all_dv_rms
         hf['all_ff'] = all_ff
         hf.close()
+
+
+def get_ff_rbf(dv_file, dv_rms_thresh=1e-2, plot=False, bandwidth=0.08):
+
+    hf = h5py.File(dv_file, 'r')
+    all_pairs = np.array(hf['all_pairs'])
+    all_dv_rms = np.array(hf['all_dv_rms'])
+    all_ff = np.array(hf['all_ff'])
+    hf.close()
+
+    alpha = all_pairs[:, :, 0]
+    beta = all_pairs[:, :, 1]
+
+    all_ff[all_dv_rms < dv_rms_thresh] = 0.0
+
+    ap = np.array(zip(alpha.ravel(), beta.ravel()))
+    x = ap[:, 0]
+    y = ap[:, 1]
+    d = all_ff.ravel()
+
+    ff_rbf = Rbf(x, y, d, function='gaussian', epsilon=bandwidth)
+
+    if plot:
+        alpha_rng = np.arange(-1.25, 0.25, 0.01)
+        beta_rng = np.arange(-1.50, 1.50, 0.01)
+        interp_ff = np.zeros([len(alpha_rng), len(beta_rng)])
+        for i,alpha in enumerate(alpha_rng):
+            for j,beta in enumerate(beta_rng):
+                interp_ff[i, j] = ff_rbf(alpha, beta)
+        interp_ff[interp_ff < 0.0] = 0.0
+
+        plt.figure()
+        plt.imshow(all_ff, interpolation='nearest', aspect='auto', extent=[alpha_rng.min(), alpha_rng.max(), beta_rng.min(), beta_rng.max()])
+        plt.colorbar()
+        plt.xlabel('Beta')
+        plt.ylabel('Alpha')
+        plt.title('Fundamental Frequency')
+
+        plt.figure()
+        plt.imshow(interp_ff, interpolation='nearest', aspect='auto', extent=[alpha_rng.min(), alpha_rng.max(), beta_rng.min(), beta_rng.max()])
+        plt.colorbar()
+        plt.xlabel('Beta')
+        plt.ylabel('Alpha')
+        plt.title('Interpolated Fundamental Frequency')
+
+    return ff_rbf
 
 
 def plot_ff(dv_file, dv_rms_thresh=1e-2):

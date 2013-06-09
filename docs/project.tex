@@ -105,7 +105,7 @@ the following assumptions:
 
 \end{enumerate}
 
-To elaborate on the last assumption, say we are given the time-varying fundamental frequency
+To elaborate on the last assumption, say we are the given time-varying fundamental frequency
 of a song syllable that we would like to learn, represented as the function $F(t_k)$. Let
 $\hat{F} = g(\bm{\phi}_k)$ be the function that gives the steady state fundamental
 frequency for a given control $\bm{\phi}_k$. The function $g$ can be empirically
@@ -153,11 +153,12 @@ First the solution must be found for $N=2$:
 v^*_2 \left( \bm{\phi}_2 \right) = \min_{\bm{u}_2} \ell_2 \left( \bm{\phi}_2, \bm{u}_2 \right)
 \end{align*}
 
-In order to solve this, we have to perform a search over a grid of values for
-$\bm{\phi}_2$. For each value on the grid, we then will use gradient descent
-to minimize $v^*_2 \left( \bm{\phi}_2 \right)$ and find an optimal $\bm{u}_2$.
-The end result is that we have a lookup table of values, giving us a function
-$\bm{u}_2(\bm{\phi}_2)$, and a function $v^*_2 \left( \bm{\phi}_2 \right)$.
+A straighforward but expensive way to solve would be to perform a search over a
+grid of values for $\bm{\phi}_2$. For each value on the grid, we then will use
+gradient descent to minimize $v^*_2 \left( \bm{\phi}_2 \right)$ and find an
+optimal $\bm{u}_2$. The end result is that we have a lookup table of values,
+giving us a function $\bm{u}_2(\bm{\phi}_2)$, and a function
+$v^*_2 \left( \bm{\phi}_2 \right)$.
 
 The optimal cost-to-go at time $N-1=1$ is
 
@@ -178,10 +179,55 @@ a functional form for the optimal control policy: $\bm{\pi}_0^* = \{ \bm{u}_1(\b
 
 Now going foward in time, with the knowledge of a start state $\bm{\phi}_0$, we can then
 compute $\bm{\phi}_1$, and then the optimal control $\bm{u}_1 \left( \bm{\phi}_1 \right)$.
-Given $\bm{u}_1$, we can then compute $\bm{\phi}_2$ and then $\bm{u}_2$. The techinque,
-albeit expensive, is generally applicable for any $N$.
+Given $\bm{u}_1$, we can then compute $\bm{\phi}_2$ and then $\bm{u}_2$. The techinque
+is generally applicable for any $N$.
 
 
+\subsubsection{A More Efficient Implementation}
+
+Solving the dynamic programming problem at a time $t_k$ requires finding a function
+$\bm{u}_k(\bm{\phi}_k)$ that minimizes $v_k(\bm{\phi}_k)$ for any
+$\bm{\phi}_k \in \mathcal{P}$, where $\mathcal{P}$ is a pre-specified
+set of realistic values. This requires us to uniformly
+sample from $\mathcal{P}$ and solve an optimization problem for each sample, a
+very computationally expensive prospect!
+
+To reduce the computational burden, we first model the function $\bm{u}_k(\bm{\phi}_k)$
+as a linear combination of $M$ radial basis functions
+$\{ \psi_1, ..., \psi_M \}$. Each basis function takes the form:
+
+\begin{align*}
+\psi_i(\bm{\phi}) = exp \left( \frac{\| \bm{\phi} - \bm{\theta}_i \| ^2 }{\sigma_i ^2} \right) 
+\end{align*}
+
+where $\bm{\theta}_i$ is the center of the basis function, $\sigma_i$ is the bandwidth of
+the basis function. Each basis function is multiplied by a coefficient
+$\bm{c}_i = \left[ c_{i1} ~ c_{i2} \right]^T$. Let $\bm{c}=\{\bm{c}_1, ... ,\bm{c}_M \}$
+be the set of all coefficients, the control is computed for a given $\bm{c}$ as:
+
+\begin{align*}
+\bm{u}_k(\bm{\phi}_k, \bm{c}) = \sum_{i=1}^M \bm{c}_i \psi_i(\bm{\phi}_k)
+\end{align*}
+
+We then formulate a single optimization problem to minimize the sum of cost
+across all points in $\mathcal{P}$ for a given $\bm{c}$:
+
+\begin{align*}
+\bm{c}^* = \argmin_{\bm{c}} \sum_{\bm{\phi} \in \mathcal{P}} v_k( \bm{\phi}, \bm{c} )
+\end{align*}
+
+The optimal control at time $t_k$ is then given as $\bm{u}_k(\bm{\phi}_k, \bm{c}^*)$.
+
+To create an initial guess for the optimization problem, each $\bm{c}_i$ is initialized
+independently by finding the minimum cost control at $\bm{\theta}_i$, the center of
+basis function $i$:
+   
+\begin{align*}
+\bm{c}_i^0 = \argmin_{\bm{c}_i} v_k( \bm{\theta}_i, \bm{c}_i )
+\end{align*}
+
+
+\iffalse
 \subsection{Temporal Hierarchy of Representation}
 
 Generically, we want to determine a joint probability between $\bm{\phi}$ and a set of
@@ -208,6 +254,7 @@ search for all $\bm{u}$ to that space. Do the same for $\sigma_2$, which will
 reduce the size of the space even further. Continue this process until the space of
 actual $\bm{u}$ is small enough to do a more efficient optimization, and then
 peform that optimization to find the optimal control.
+\fi
 
 
 \section*{Acknowledgments}

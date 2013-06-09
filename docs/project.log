@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.8.22)  5 JUN 2013 16:30
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.7.13)  8 JUN 2013 23:22
 entering extended mode
  %&-line parsing enabled.
 **project.tex
@@ -308,14 +308,15 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 41.
  [1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2] [3] (./project.aux) )
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2] [3] [4] (./project.aux
+) )
 (\end occurred inside a group at level 1)
 
-### simple group (level 1) entered at line 221 ({)
+### simple group (level 1) entered at line 268 ({)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 4939 strings out of 495061
- 69783 string characters out of 1182621
+ 4940 strings out of 495061
+ 69799 string characters out of 1182621
  146087 words of memory out of 3000000
  8015 multiletter control sequences out of 15000+50000
  21615 words of font info for 56 fonts, out of 3000000 for 9000
@@ -335,9 +336,9 @@ lic/amsfonts/cm/cmsy6.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts
 /cm/cmsy7.pfb></usr/share/texmf-texlive/fonts/type1/urw/courier/ucrr8a.pfb></us
 r/share/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-texliv
 e/fonts/type1/urw/times/utmr8a.pfb>
-Output written on project.pdf (3 pages, 164912 bytes).
+Output written on project.pdf (4 pages, 168454 bytes).
 PDF statistics:
- 110 PDF objects out of 1000 (max. 8388607)
- 14 named destinations out of 1000 (max. 500000)
+ 114 PDF objects out of 1000 (max. 8388607)
+ 15 named destinations out of 1000 (max. 500000)
  41 words of extra memory for PDF output out of 10000 (max. 10000000)
 

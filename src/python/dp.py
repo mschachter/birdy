@@ -38,6 +38,36 @@ class CostToGo(object):
         self.next_c2g = c2g_obj
 
 
+class ControlFunction(object):
+    """ Nonparametric representation of feedback control for a single time point. Modeled as
+        a combination of radial basis functions.
+    """
+
+    def __init__(self, centers, bandwidths, coefficients=None):
+        self.M = len(centers)
+        self.bandwidths = bandwidths
+        self.centers = centers
+        assert len(bandwidths) == len(centers)
+
+        if coefficients is None:
+            self.C = np.zeros([self.M, 2])
+        else:
+            self.C = coefficients
+        assert self.C.shape[0] == self.M
+
+    def evaluate(self, x):
+        assert len(x) == 2
+
+        u = np.zeros([2])
+        for i in range(self.M):
+            theta = self.centers[i]
+            r = np.linalg.norm(x - theta)
+            sigma = self.bandwidths[i]
+            u += self.C[i, :] * np.exp(-r**2 / sigma**2)
+
+        return u
+
+
 class CostToGoModel(object):
 
     def __init__(self, c2g_obj, x):
