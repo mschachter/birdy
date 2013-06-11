@@ -118,7 +118,7 @@ Given these assumptions, the cost at time $t_k$ of applying control $\bm{u}$ is:
 \ell_k \left( \bm{\phi}_{k}, \bm{u} \right) = \bm{\phi}_{k}^T \bm{\phi}_{k} +
 							\bm{u}^T \bm{u} +
 							%\| \bm{\phi}_{k} - \bm{\phi}_{k-1} \| +
-							\left( F(t_k) - g(\bm{\phi}_{k}) \right) ^2
+							\left( F(t_{k+1}) - g(\bm{\phi}_{k+1}) \right) ^2
 \end{align*}
 
 Let $N$ be the number of time points we want to control, and let
@@ -155,8 +155,8 @@ v^*_2 \left( \bm{\phi}_2 \right) = \min_{\bm{u}_2} \ell_2 \left( \bm{\phi}_2, \b
 
 A straighforward but expensive way to solve would be to perform a search over a
 grid of values for $\bm{\phi}_2$. For each value on the grid, we then will use
-gradient descent to minimize $v^*_2 \left( \bm{\phi}_2 \right)$ and find an
-optimal $\bm{u}_2$. The end result is that we have a lookup table of values,
+gradient descent to minimize $\ell_2 \left( \bm{\phi}_2, \bm{u}_2 \right)$ with
+respect to $\bm{u}_2$. The end result is that we have a lookup table of values,
 giving us a function $\bm{u}_2(\bm{\phi}_2)$, and a function
 $v^*_2 \left( \bm{\phi}_2 \right)$.
 
@@ -203,7 +203,7 @@ $\{ \psi_1, ..., \psi_M \}$. Each basis function takes the form:
 where $\bm{\theta}_i$ is the center of the basis function, $\sigma_i$ is the bandwidth of
 the basis function. Each basis function is multiplied by a coefficient
 $\bm{c}_i = \left[ c_{i1} ~ c_{i2} \right]^T$. Let $\bm{C}=\left[ \bm{c}_1, ... ,\bm{c}_M \right]$
-be the set of all coefficients, the control is computed for a given $\bm{C}$ as:
+be the $2xM$ matrix of coefficients, the control is computed for a given $\bm{C}$ as:
 
 \begin{align*}
 \bm{u}_k(\bm{\phi}_k, \bm{C}) = \sum_{i=1}^M \bm{c}_i \psi_i(\bm{\phi}_k)

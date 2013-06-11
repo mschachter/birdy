@@ -1,20 +1,22 @@
-import copy
-import operator
-
 import numpy as np
 from scipy.integrate import ode
 import matplotlib.pyplot as plt
+import time
+from analysis import get_ff_rbf
+
+from optimization import *
 
 
 class CostToGo(object):
 
-    def __init__(self, system, ff_rbf, ff_desired, dt=0.001, umin=-1.0, umax=1.0, ustep=0.1, bandwidth=0.2):
+    def __init__(self, system, ff_rbf, ff_desired, dt=0.001, umin=-1.0, umax=1.0, ustep=0.1, bandwidth=0.2, ff_normalizer=10.0):
 
         self.system = system
         self.next_c2g = None
         self.dt = dt
         self.ff_rbf = ff_rbf
         self.ff_desired = ff_desired
+        self.ff_normalizer = ff_normalizer
 
         u1 = np.arange(umin, umax+ustep, ustep)
         u2 = np.arange(umin, umax+ustep, ustep)
@@ -24,56 +26,114 @@ class CostToGo(object):
         self.control = RBControlFunction(centers, bandwidths=bandwidth)
 
         #grid to evaluate RBF cost function
-        alpha = np.arange(-1.25, -0.05, 0.05)
-        beta = np.arange(-1.10, 1.10, 0.05)
-        A,B = np.meshgrid(alpha, beta)
+        self.alpha = np.arange(-1.25, -0.05, 0.05)
+        self.beta = np.arange(-1.10, 1.10, 0.05)
+        A, B = np.meshgrid(self.alpha, self.beta)
         self.rbf_eval_points = np.array(zip(A.ravel(), B.ravel()))
         self.rbf_num_eval_points = self.rbf_eval_points.shape[0]
 
+    def plot(self):
+
+        cost_xy = np.zeros([len(self.alpha), len(self.beta)])
+        u1_xy = np.zeros([len(self.alpha), len(self.beta)])
+        u2_xy = np.zeros([len(self.alpha), len(self.beta)])
+        for i,alpha in enumerate(self.alpha):
+            for j,beta in enumerate(self.beta):
+                x = np.array([alpha, beta])
+                u = self.optimal_control(x)
+                u1_xy[i, j] = u[0]
+                u2_xy[i, j] = u[1]
+                cost_xy[i, j] = self.optimal_c2g(x)
+
+        plt.subplot(2, 2, 1)
+        plt.imshow(cost_xy, interpolation='nearest', aspect='auto', extent=[self.alpha.min(), self.alpha.max(), self.beta.min(), self.beta.max()])
+        plt.title('Optimal Cost Surface')
+        plt.xlabel('Alpha')
+        plt.ylabel('Beta')
+        plt.colorbar()
+
+        plt.subplot(2, 2, 2)
+        plt.plot(u1_xy.ravel(), u2_xy.ravel(), 'go')
+        plt.axis('tight')
+        plt.xlabel('Optimal Control 1')
+        plt.ylabel('Optimal Control 2')
+
+        plt.subplot(2, 2, 3)
+        plt.imshow(u1_xy, interpolation='nearest', aspect='auto', extent=[self.alpha.min(), self.alpha.max(), self.beta.min(), self.beta.max()])
+        plt.title('Optimal Control 1')
+        plt.xlabel('Alpha')
+        plt.ylabel('Beta')
+        plt.colorbar()
+
+        plt.subplot(2, 2, 4)
+        plt.imshow(u2_xy, interpolation='nearest', aspect='auto', extent=[self.alpha.min(), self.alpha.max(), self.beta.min(), self.beta.max()])
+        plt.title('Optimal Control 2')
+        plt.xlabel('Alpha')
+        plt.ylabel('Beta')
+        plt.colorbar()
+
     def c2g(self, x, u):
-        fcost = (self.ff_rbf(x) - self.ff_desired)**2 / (5000.0**2)
+
+        #compute state at next time point
+        xnext = self.system.rhs(x, u)*self.dt + x
+        #compute cost of missing desired frequency at next time point
+        fcost = ((self.ff_rbf(xnext[0], xnext[1]) - self.ff_desired) / self.ff_normalizer)**2
+        #compute overall cost
         l = np.dot(x, x) + np.dot(u, u) + fcost
+        #print '\t[c2g]: x=[%f, %f], u=[%f, %f], fcost=%f, l=%f' % (x[0], x[1], u[0], u[1], fcost, l)
+        #add all the tail costs
         if self.next_c2g is not None:
-            xnext = self.system.rhs(x, u)*self.dt + x
             l += self.next_c2g.optimal_c2g(xnext)
         return l
 
+    def optimal_control(self, x):
+        return self.control.evaluate(x)
+
     def optimal_c2g(self, x):
-        u = self.control.evaluate(x)
+        u = self.optimal_control(x)
         return self.c2g(x, u)
 
     def optimal_c2g_objective(self, C):
+        stime = time.time()
         cost_sum = 0.0
         Cm = C.reshape(2, len(self.control.centers))
         for x in self.rbf_eval_points:
-            cost_sum += self.control.evaluate(x, Cm)
+            u = self.control.evaluate(x, Cm)
+            cost_sum += self.c2g(x, u)
+        etime = time.time() - stime
         return cost_sum / self.rbf_num_eval_points
 
-    def compute_optimal_control_rbf(self, step_size=1e-3, max_iter=1000):
+    def compute_optimal_control_rbf(self, local_step_size=1e-1, global_step_size=10.0, max_iter=10):
         #generate an initial guess by optimizing at each RBF center
-        for k,ci in enumerate(self.ff_rbf.centers):
-            ui = self.compute_optimal_control_single(ci)
+        print 'Doing local pre-optimization to generate initial guess...'
+        for k,ci in enumerate(self.control.centers):
+            ui = self.compute_optimal_control_single(ci, step_size=local_step_size)
+            ui_nan = np.isnan(ui)
+            if ui_nan.sum() > 0:
+                print 'nan found for optimal control at center (%f, %f)' % (ci[0], ci[1])
+                ui[ui_nan] = 0.0
             self.control.C[:, k] = ui
 
         #do global optimization across RBF centers
+        print 'Doing global optimization...'
         C0 = self.control.C.ravel()
         m = RBFCostToGoModel(self, C0)
-        tgd = ThresholdGradientDescent(m, step_size=step_size, threshold=0.0)
+        tgd = ThresholdGradientDescent(m, step_size=global_step_size, threshold=0.0, slope_threshold=1e-6)
         while not tgd.converged and tgd.iter < max_iter:
             tgd.iterate()
             print '[%d]: avg. cost=%0.6f' % (tgd.iter, tgd.errors[-1])
         Cstar = tgd.best_params
         self.control.C = Cstar.reshape(2, len(self.control.centers))
 
-    def compute_optimal_control_single(self, x, step_size=1e-3, max_iter=1000):
+    def compute_optimal_control_single(self, x, step_size=1e-1, max_iter=1500):
         """
             Compute the optimal control at a single point.
         """
-        m = SingleCostToGoModel(self, x)
-        tgd = ThresholdGradientDescent(m, step_size=step_size, threshold=0.0)
+        m = SingleCostToGoModel(self, x, np.array([0.0, 0.0]))
+        tgd = ThresholdGradientDescent(m, step_size=step_size, threshold=0.0, slope_threshold=-1e-6)
         while not tgd.converged and tgd.iter < max_iter:
             tgd.iterate()
-            print '[%d]: cost=%0.6f' % (tgd.iter, tgd.errors[-1])
+            #print '[%d]: cost=%0.6f, u[0]=%f, u[1]=%f, slope=%f' % (tgd.iter, tgd.errors[-1], tgd.params[0], tgd.params[1], tgd.slope)
         ustar = tgd.best_params
         return ustar
 
@@ -95,7 +155,9 @@ class RBControlFunction(object):
             self.C = np.zeros([2, self.M])
         else:
             self.C = coefficients
-        assert self.C.shape[0] == self.M
+
+        assert self.C.shape[0] == 2
+        assert self.C.shape[1] == self.M
 
     def evaluate(self, x, C=None):
 
@@ -103,8 +165,8 @@ class RBControlFunction(object):
         if C is not None:
             Cused = C
 
-        r = ( (self.centers - x)**2 ).sum(axis=0)
-        w = np.exp(r / self.bandwidths**2)
+        r = ( (self.centers - x)**2 ).sum(axis=1)
+        w = np.exp(-r / self.bandwidths**2)
         cc = Cused * w
         u = cc.sum(axis=1)
 
@@ -113,15 +175,16 @@ class RBControlFunction(object):
 
 class SingleCostToGoModel(object):
 
-    def __init__(self, c2g_obj, x):
+    def __init__(self, c2g_obj, x, u0):
         self.c2g = c2g_obj
-        self.params = x
+        self.params = u0
+        self.x = x
 
     def error(self, u):
-        return self.c2g.c2g(self.params, u)
+        return self.c2g.c2g(self.x, u)
 
     def grad(self, u):
-        return finite_diff_grad(self.error, u)
+        return finite_diff_grad(self.error, u, eps=1e-8)
 
 
 class RBFCostToGoModel(object):
@@ -190,157 +253,22 @@ class LinearSystem(object):
         plt.grid()
 
 
-class ThresholdGradientDescent(object):
+class ControlSystem(object):
 
-    def __init__(self, model, step_size=1e-3, threshold=1.0, earlystop_model=None, gradient_norm=True, group_indices=None, slope_threshold=-1e-3):
-        self.threshold = threshold
-        self.model = model
-        self.step_size = step_size
-        self.earlystop_model = earlystop_model
-        self.errors = list()
-        self.es_errors = list()
-        self.params = model.params
-        self.gradient_norm = gradient_norm
-        self.converged = False
-        self.num_iters_for_slope = 5
-        self.slope = -np.Inf
-        self.slope_threshold = slope_threshold
-        self.iter = 0
-        self.group_indices = group_indices
-        self.groups = None
-        self.best_params = None
-        self.best_err = np.inf
+    def __init__(self, ff_desired, dv_file='/home/cheese63/birdy/data/admissible_controls_small.h5'):
 
-        if self.group_indices is not None:
-            self.groups = np.unique(self.group_indices)
-            if len(threshold) > 1 and len(threshold) != len(self.groups):
-                raise Exception('Number of thresholds specified must equal the number of unique groups!')
-            self.group_indices_map = dict()
-            for g in self.groups:
-                self.group_indices_map[g] = np.where(self.group_indices == g)
+        self.system = LinearSystem(np.array([[-1000.0, 0], [0.0, -900.0]]), center=np.array([-0.30, 0.30]))
+        self.ff_rbf = get_ff_rbf(dv_file, plot=False, bandwidth=0.08)
+        self.c2g_chain = list()
+        self.ff_desired = ff_desired
+        nsteps = len(ff_desired)
+        for k in range(nsteps):
+            desired_freq = ff_desired[nsteps-k-1]
+            c2g = CostToGo(self.system, self.ff_rbf, desired_freq)
+            if k > 0:
+                c2g.set_next(self.c2g_chain[-1])
+            self.c2g_chain.append(c2g)
 
-    def iterate(self):
-
-        #compute gradient, update parameters
-        g = self.model.grad(self.params)
-
-        #threshold out elements of the gradient
-        if not np.isscalar(self.threshold):
-            for k,(group,gindex) in enumerate(self.group_indices_map.iteritems()):
-                gsub = g[gindex]
-                if self.gradient_norm:
-                    gsub /= np.linalg.norm(gsub)
-                gabs = np.abs(gsub)
-                gthresh = gabs.max()*self.threshold[k]
-                gsub[gabs < gthresh] = 0.0
-                g[gindex] = gsub
-
-        else:
-            if self.gradient_norm:
-                g /= np.linalg.norm(g)
-            gabs = np.abs(g)
-            gthresh = gabs.max()*self.threshold
-            g[gabs < gthresh] = 0.0
-
-        self.params = self.params - self.step_size*g
-
-        #compute error, check for convergenc
-        e = self.model.error(self.params)
-        self.errors.append(e)
-
-        if self.earlystop_model is not None:
-            es_err = self.earlystop_model.error(self.params)
-            self.es_errors.append(es_err)
-
-            if es_err < self.best_err:
-                self.best_err = es_err
-                self.best_params = copy.copy(self.params)
-
-            if len(self.es_errors) >= self.num_iters_for_slope:
-                slope,intercept = np.polyfit(range(self.num_iters_for_slope), self.es_errors[-self.num_iters_for_slope:], 1)
-                slope /= np.abs(np.array(self.es_errors[-self.num_iters_for_slope:]).mean())
-                self.slope = slope
-                if self.slope > self.slope_threshold:
-                    self.converged = True
-        else:
-            if len(self.errors) >= self.num_iters_for_slope:
-                slope,intercept = np.polyfit(range(self.num_iters_for_slope), self.errors[-self.num_iters_for_slope:], 1)
-                slope /= np.abs(np.array(self.errors[-self.num_iters_for_slope:]).mean())
-                self.slope = slope
-                if self.slope > self.slope_threshold:
-                    self.converged = True
-
-                if e < self.best_err:
-                    self.best_err = e
-                self.best_params = copy.copy(self.params)
-
-        self.iter += 1
-
-
-def generate_stable_linear_systems(plot=True, amin=-1.0, amax=1.0, dmin=-1.0, dmax=1.0):
-    """
-        Generates linear systems of the form:
-        [[1.0 a]
-         [a   d]]
-        that has real-valued negative eigenvalues.
-
-        Returns a list of matrices, ordered by the norm of [eigenvalue1, eigenvalue2] (fastest to slowest decay)
-    """
-    a = np.arange(amin, amax, 0.05)
-    d = np.arange(dmin, dmax, 0.05)
-
-    A,D = np.meshgrid(a, d)
-
-    #compute eigenvalues
-    e1 = D-1.0 + np.sqrt(D**2 + 4*A**2 + 2*D + 1.0)
-    e2 = D-1.0 - np.sqrt(D**2 + 4*A**2 + 2*D + 1.0)
-
-    #find points where both eigenvalues are negative
-    nindx = (e1 < 0.0) & (e2 < 0.0)
-
-    #compute magnitude of eigenvalues
-    evals = np.array(zip(e1[nindx], e2[nindx]))
-
-    mtudes = [np.linalg.norm(x) for x in evals]
-    pts = zip(A[nindx], D[nindx])
-
-    #sort values of a and d by the magnitude of eigenvalues
-    all_vals = [(pts[k], mtudes[k]) for k in range(len(mtudes))]
-    all_vals.sort(key=operator.itemgetter(-1), reverse=True)
-
-    #construct matrices
-    systems = list()
-    for (a,d),mtude in all_vals:
-        M = np.array([[-1.0, a], [a, d]])
-        systems.append(M)
-
-    if plot:
-        pe1 = copy.copy(e1)
-        pe1[~nindx] = np.nan
-        pe2 = copy.copy(e2)
-        pe2[~nindx] = np.nan
-
-        plt.figure()
-        plt.subplot(2, 1, 1)
-        plt.imshow(np.real(pe1), interpolation='nearest', aspect='auto', extent=[amin, amax, dmin, dmax])
-        plt.colorbar()
-        plt.title('$\lambda_1$')
-        plt.subplot(2, 1, 2)
-        plt.imshow(np.real(pe2), interpolation='nearest', aspect='auto', extent=[amin, amax, dmin, dmax])
-        plt.colorbar()
-        plt.title('$\lambda_2$')
-
-    return systems
-
-
-def finite_diff_grad(errorfunc, params, eps=1e-8):
-
-    base_err = errorfunc(params)
-    fdgrad = np.zeros(len(params))
-
-    for k in range(len(params)):
-        dparams = copy.deepcopy(params)
-        dparams[k] += eps
-        fdgrad[k] = (errorfunc(dparams) - base_err) / eps
-
-    return fdgrad
+        for k,c2g in enumerate(self.c2g_chain):
+            print 'Computing optimal cost to go for time %d' % (nsteps - k - 1)
+            c2g.compute_optimal_control_rbf()
