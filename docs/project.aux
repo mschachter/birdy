@@ -14,8 +14,48 @@
 \global\let\hyper@last\relax 
 \gdef\HyperFirstAtBeginDocument#1{#1}
 \providecommand\HyField@AuxAddToFields[1]{}
+\citation{Mindlin2005}
+\citation{Sitt2010}
 \@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.1}The Zebra Finch Vocalization System}{1}{subsection.1.1}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Control of the Syrinx Model}{1}{subsection.1.2}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Dynamic Programming Solution to Optimal Control}{2}{subsection.1.3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces The Zebra Finch synrinx, with two independently controlled vocal cords.}}{1}{figure.1}}
+\newlabel{fig:vocal_tract}{{1}{1}{The Zebra Finch Vocalization System\relax }{figure.1}{}}
+\citation{Todorov2002}
+\newlabel{eq_oscillator}{{{1}}{2}{The Zebra Finch Vocalization System\relax }{figure.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Control of the Syrinx Model}{2}{subsection.1.2}}
+\newlabel{eq_control}{{{2}}{2}{Control of the Syrinx Model\relax }{subsection.1.2}{}}
+\newlabel{eq_ff}{{{3}}{2}{Control of the Syrinx Model\relax }{Item.3}{}}
+\citation{Bertsekas2000}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Dynamic Programming Solution to Optimal Control}{3}{subsection.1.3}}
+\newlabel{eq_dp}{{{4}}{3}{Dynamic Programming Solution to Optimal Control\relax }{subsection.1.3}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {1.3.1}A More Efficient Implementation}{3}{subsubsection.1.3.1}}
+\newlabel{section_implementation}{{1.3.1}{3}{A More Efficient Implementation\relax }{subsubsection.1.3.1}{}}
+\newlabel{eq_rbf}{{{5}}{3}{A More Efficient Implementation\relax }{subsubsection.1.3.1}{}}
+\citation{JRDormand1980}
+\newlabel{eq_u_rbf}{{{6}}{4}{A More Efficient Implementation\relax }{subsubsection.1.3.1}{}}
+\newlabel{eq_cstar}{{{7}}{4}{A More Efficient Implementation\relax }{subsubsection.1.3.1}{}}
+\newlabel{eq_ci}{{{8}}{4}{A More Efficient Implementation\relax }{subsubsection.1.3.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Methods and Results}{4}{section.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Simulation}{4}{subsection.2.1}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces The UI for the simulation environment.}}{4}{figure.2}}
+\newlabel{fig:simulation}{{2}{4}{Simulation\relax }{figure.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Mapping Controls to Fundamental Frequency}{4}{subsection.2.2}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces The simulated steady-state fundamental frequency as a function of control (left), and it's interpolation by radial basis functions (right).}}{5}{figure.3}}
+\newlabel{fig:ff}{{3}{5}{Mapping Controls to Fundamental Frequency\relax }{figure.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Optimal Control}{5}{subsection.2.3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces A phase plot for the passive dynamics of the control system. Color indicates magnitude, red is large, blue is small.}}{6}{figure.4}}
+\newlabel{fig:phase_plot}{{4}{6}{Optimal Control\relax }{figure.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces The computation time for optimization at each time point.}}{6}{figure.5}}
+\newlabel{fig:optimization_time}{{5}{6}{Optimal Control\relax }{figure.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Upper Left: the optimal cost-to-go function at time point $N=10$. Upper Right: the optimal control vector elements plotted against eachother. Lower Left: optimal control 1 as a function of $\bm  {\phi }$. Lower Right:optimal control 1 as a function of $\bm  {\phi }$. }}{7}{figure.6}}
+\newlabel{fig:cost_and_control}{{6}{7}{Optimal Control\relax }{figure.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces A spectrogram for an optimally-controlled vocalization.}}{7}{figure.7}}
+\newlabel{fig:spectrogram}{{7}{7}{Optimal Control\relax }{figure.7}{}}
+\bibstyle{acm}
+\bibdata{papers}
+\bibcite{Bertsekas2000}{1}
+\bibcite{JRDormand1980}{2}
+\bibcite{Mindlin2005}{3}
+\bibcite{Sitt2010}{4}
+\bibcite{Todorov2002}{5}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Conclusion}{8}{section.3}}

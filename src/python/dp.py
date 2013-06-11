@@ -1,3 +1,4 @@
+import h5py
 import numpy as np
 from scipy.integrate import ode
 import matplotlib.pyplot as plt
@@ -5,11 +6,12 @@ import time
 from analysis import get_ff_rbf
 
 from optimization import *
+from oscillators import NormalOscillator
 
 
 class CostToGo(object):
 
-    def __init__(self, system, ff_rbf, ff_desired, dt=0.001, umin=-1.0, umax=1.0, ustep=0.1, bandwidth=0.2, ff_normalizer=10.0):
+    def __init__(self, system, ff_rbf, ff_desired, dt=0.001, umin=-1.0, umax=1.0, ustep=0.25, bandwidth=0.30, ff_normalizer=10.0):
 
         self.system = system
         self.next_c2g = None
@@ -92,6 +94,12 @@ class CostToGo(object):
     def optimal_c2g(self, x):
         u = self.optimal_control(x)
         return self.c2g(x, u)
+
+    def optimal_next(self, x):
+        u = self.optimal_control(x)
+        v = self.optimal_c2g(x)
+        xnext = self.system.rhs(x, u)*self.dt + x
+        return xnext,u,v
 
     def optimal_c2g_objective(self, C):
         stime = time.time()
@@ -223,9 +231,8 @@ class LinearSystem(object):
             traj.append(r.y)
         return np.array(traj)
 
-    def phase_plot(self, alphamin=-1.25, alphamax=0.05, betamin=-1.25, betamax=1.25):
+    def phase_plot(self, alphamin=-1.25, alphamax=0.05, betamin=-1.25, betamax=1.25, nb_points=20):
         fig = plt.figure()
-        nb_points = 30
         x = np.linspace(alphamin, alphamax, nb_points)
         y = np.linspace(betamin, betamax, nb_points)
 
@@ -255,7 +262,7 @@ class LinearSystem(object):
 
 class ControlSystem(object):
 
-    def __init__(self, ff_desired, dv_file='/home/cheese63/birdy/data/admissible_controls_small.h5'):
+    def __init__(self, ff_desired, dv_file='/home/cheese63/birdy/data/admissible_controls_small.h5', control_file=None):
 
         self.system = LinearSystem(np.array([[-1000.0, 0], [0.0, -900.0]]), center=np.array([-0.30, 0.30]))
         self.ff_rbf = get_ff_rbf(dv_file, plot=False, bandwidth=0.08)
@@ -269,6 +276,66 @@ class ControlSystem(object):
                 c2g.set_next(self.c2g_chain[-1])
             self.c2g_chain.append(c2g)
 
+        if control_file is None:
+            for k,c2g in enumerate(self.c2g_chain):
+                stime = time.time()
+                print 'Computing optimal cost to go for time %d' % (nsteps - k - 1)
+                c2g.compute_optimal_control_rbf()
+                etime = time.time() - stime
+                print 'Elapsed time: %0.2f min' % (etime / 60.0)
+        else:
+            hf = h5py.File(control_file, 'r')
+            nsteps = len(hf.keys())
+            for k in range(nsteps):
+                index = nsteps - k - 1
+                key = '%d' % index
+                grp = hf[key]
+                c2g = self.c2g_chain[index]
+                c2g.control.C = np.array(grp['C'])
+                c2g.control.centers = np.array(grp['centers'])
+                c2g.control.bandwidths = np.array(grp['bandwidths'])
+            hf.close()
+
+    def save(self, output_file):
+        nsteps = len(self.c2g_chain)
+        hf = h5py.File(output_file, 'w')
         for k,c2g in enumerate(self.c2g_chain):
-            print 'Computing optimal cost to go for time %d' % (nsteps - k - 1)
-            c2g.compute_optimal_control_rbf()
+            grp = hf.create_group('%d' % (nsteps - k - 1))
+            grp['C'] = c2g.control.C
+            grp['bandwidths'] = c2g.control.bandwidths
+            grp['centers'] = c2g.control.centers
+            grp['ff_desired'] = c2g.ff_desired
+        hf.close()
+
+    def run(self, x0):
+
+        states = list()
+        states.append(x0)
+        controls = list()
+        costs = list()
+        for k,c2g in enumerate(self.c2g_chain[::-1]):
+            x = states[-1]
+            xnext,u,v = c2g.optimal_next(x)
+            costs.append(v)
+            controls.append(u)
+            states.append(xnext)
+
+        return np.array(states),np.array(controls),np.array(costs)
+
+    def control_oscillator(self, states, dt=1e-3, oscillator_dt=1e-6):
+
+        no = NormalOscillator()
+
+        output = list()
+
+        oscillator_x = 0.0
+        oscillator_v = 0.0
+
+        for alpha,beta in states:
+            params = {'alpha':alpha, 'beta':beta}
+            ostates = no.run_simulation(params, dt, oscillator_dt, initial_x=oscillator_x, initial_v=oscillator_v)
+            oscillator_x = ostates[-1, 0]
+            oscillator_v = ostates[-1, 1]
+            output.extend(ostates[:, 0])
+
+        return output
