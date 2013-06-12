@@ -64,6 +64,28 @@ figures and results in this paper can be found at:
    \url{http://github.com/mschachter/birdy}
 \end{center}
 
+\subsection{Zebra Finch Song}
+
+The Zebra Finch is an \emph{oscine songbird}, it vocalizes complex sounds in order
+to defend terroritory and attract mates. A male juvenile Zebra Finch learns a unique
+song within 90 days of hatching, usually from his father.
+
+The song of a Zebra Finch is organized hiearchically. At the largest time scale is
+a repeating \emph{motif} that lasts 500-1000ms. The motif is comprised of smaller
+20-50ms subunits called \emph{syllables}. The syllables are comprised of sound
+primitives such as frequency sweeps, noise bursts, and harmonic stacks, collectively
+called \emph{tones}. Figure \ref{fig:song} illustrates an example of a typical Zebra
+Finch song. For this project we have focused on the time scale of sound primitives,
+and more specifically the class of harmonic stacks.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{images/song.png}
+\caption{Zebra Finch song, the sound pressure waveform (top) and associated spectrogram (bottom).}
+\label{fig:song}
+\end{figure}
+
+
 \subsection{The Zebra Finch Vocalization System}
 
 Like human speech, Zebra Finch song is generated at it's source by oscillations in airflow
@@ -73,7 +95,7 @@ synrinx.
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.5\textwidth]{images/tracheobronchial_syrinx.png}
-\caption{The Zebra Finch synrinx, with two independently controlled vocal cords.}
+\caption{The Zebra Finch synrinx, with two independently controlled vocal cords. Taken from \cite{Mindlin2005}}
 \label{fig:vocal_tract}
 \end{figure}
 
@@ -87,8 +109,21 @@ these nonlinear oscillations is taken from \cite{Sitt2010}:
 \end{align*}
 
 The control parameters of the model are $\alpha$ and $\beta$. $\gamma$ = 23500 is a constant.
-The control space has a rich bifurcation structure, with both Hopf and saddle-node in a
-limit cycle bifurcations leading to the birth of oscillations.
+The control space has a rich bifurcation structure, with both Hopf, homoclinic, and saddle-node
+in a limit cycle bifurcations leading to the birth of oscillations, as illustrated in figure
+\ref{fig:bifurcations}. The type of bifurcation that occurs can determine the overall spectral
+content of the sound produced, as noted in \cite{Sitt2010}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{images/bifurcations_and_trajectories.png}
+\caption{A bifurcation diagram with trajectories, taken from \cite{Sitt2010}.
+         The red line is a Hopf bifurcation, the dashed black line is homoclinic,
+         and the dotted blue line is a saddle-node bifurcation. Paths A and H represent
+         trajectories that produce Hopf and Saddle-node in a limit cycle bifurcations.}
+\label{fig:bifurcations}
+\end{figure}
+
 
 \subsection{Control of the Syrinx Model}
 
@@ -103,7 +138,7 @@ system:
 \end{align*}
 
 where $A$ is a 2x2 matrix, chosen to make the passive dynamics of the control system decay
-to some physiologically relevant rest state.
+to some physiologically relevant rest state $\bm{\phi}_{rest}$.
 
 We discretized time to simplify the analysis. Let $\Delta\tau$ be the time step for
 simulation of the control system, and define $t_k = k\Delta\tau$. Also define
@@ -112,7 +147,7 @@ control is significantly larger than that of the oscillator. In practice we used
 discrete time map representing the control system as given by the forward Euler step:
 
 \begin{align*}
-\bm{\phi}_{k+1} &= \begin{aligned}\left( A \left( \bm{\phi}_k - \bm{\phi}_{center} \right) + \bm{u}_k \right) \Delta\tau + \bm{\phi}_{k}\end{aligned} \numberthis \label{eq_control}
+\bm{\phi}_{k+1} &= \begin{aligned}\left( A \left( \bm{\phi}_k - \bm{\phi}_{rest} \right) + \bm{u}_k \right) \Delta\tau + \bm{\phi}_{k}\end{aligned} \numberthis \label{eq_control}
 \end{align*}
 
 In optimal control theory \cite{Todorov2002}, a cost function is specified and is to be minimized over time to
@@ -305,7 +340,8 @@ of the system defined by \eqref{eq_control}. We chose the following matrix:
 A = \left[ \begin{array}{cc} -1000 & 0 \\ 0 & -900 \end{array} \right]
 \end{align*}
 
-and specified $\bm{\phi}_{center} = \left[ -0.30 ~ 0.30 \right] ^T$. The passive
+and specified $\bm{\phi}_{rest} = \left[ -0.30 ~ 0.30 \right] ^T$, a value where
+only one stable fixed point exists and no oscillations can occur. The passive
 dynamics had the phase plot specified in figure \ref{fig:phase_plot}. The values
 of $A$ were specified such that both $\alpha$ and $\beta$ decayed to their rest
 points within 10ms.
@@ -387,10 +423,10 @@ range, dependent on the value of $\alpha$. It's probably best not to over-interp
 figure in the absence of a more rigorous analysis of bugs. The upper right panel shows
 $u_0$ vs $u_1$, showing a very much nonlinear relationship between the two.
 
-You may ask yourself at this point, "does it work"? The answer for now is "perhaps". Figure
+You may ask yourself at this point, "does it work"? The answer for now is "not yet". Figure
 \ref{fig:spectrogram} is a spectrogram of a 10ms simulation for the optimal control law
-applied to a given initial condition. There's plenty of power in the 3000Hz range, but again,
-it's really unclear if this was just dumb-luck. More debugging is necessary!
+applied to a given initial condition. There's plenty of power in the 3000Hz range, but clearly
+the fundamental frequency is closer to 1000Hz. More debugging is necessary!
 
 \begin{figure}[h]
 \centering
@@ -406,6 +442,32 @@ This work was an exciting foray into the world of nonlinear oscillators and opti
 theory. It's a work-in-progress, setting the stage for my thesis work, which will require
 the generation of synthetic Zebra Finch syllables.
 
+The basic idea for future work will be to identify the "motor primitives" of Zebra Finch
+song. These motor primitives are the motor commands, i.e. the feedback control functions
+$\bm{u}_k(\bm{\phi}_k)$, that dictate the spectral content of a song for durations of 5-10ms.
+
+The major bottleneck right now is computation. The dynamic programming algorithm takes a
+long time. There are many ways to speed it up. Some ways to do so may include coming up
+with a better parameterization for the control functions than RBFs, faster generation of
+initial guesses, implementation of an analytic gradient (if possible), and an optimization
+algorithm such as scaled conjugate gradient descent that should converge faster.
+
+Note that there was no actual feedback used in this work. The Zebra Finch auditory system
+cannot provide sensory feedback in less than 20-50ms, which is often longer than the
+duration of the syllable. Instead of using feedback, we predicted the fundamental frequency
+through an emprically estimated function (equation \eqref{eq_ff}). We used what is called
+a \emph{corrolary discharge}, a copy of the motor command, and ran it through a
+\emph{forward model}, a model that takes a motor command and produces a prediction of
+the output state. By doing so we formulated the error in the predicted fundamental
+frequency, and tried to minimize that error.
+
+The use of forward models and corrolary discharge is very general and has been used
+to implement a Zebra Finch learning model in \cite{Troyer2000a}. We hope to extend
+this methodology to sound features that span longer periods of time. The idea would
+be to start building associations between the properties of a syllable at several
+time scales, and in doing so actually simplify the function form of the feedback
+control laws. We can begin to explore the various timescales that make learning
+easier, and explore their representation by neurons in the Zebra Finch auditory cortex.
 
 \iffalse
 \subsection{Temporal Hierarchy of Representation}
@@ -440,7 +502,7 @@ peform that optimization to find the optimal control.
 \section*{Acknowledgments}
 
 Thank you to H\'{e}di Soula, who created a C++/Python implementation of this model in our lab
-and has provided ideas, expertise, and feedback on this project. Extra thanks to Jim Crutchfield,
+and has provided ideas, expertise, and feedback on this project. A thousand thanks to Jim Crutchfield,
 who facilitated an excellent NCASO course and offered lots of advice on this project.
 
 \bibliographystyle{acm}

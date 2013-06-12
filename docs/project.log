@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012/Debian) (format=pdflatex 2013.6.9)  11 JUN 2013 15:19
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012/Debian) (format=pdflatex 2013.6.9)  11 JUN 2013 19:30
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -375,89 +375,135 @@ File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 51.
 
-<images/tracheobronchial_syrinx.png, id=47, 639.38875pt x 540.0175pt>
+<images/song.png, id=50, 909.1566pt x 643.9257pt>
+File: images/song.png Graphic file (type png)
+ <use images/song.png>
+Package pdftex.def Info: images/song.png used on input line 83.
+(pdftex.def)             Requested size: 337.86465pt x 239.30011pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<images/tracheobronchial_syrinx.png, id=54, 639.38875pt x 540.0175pt>
 File: images/tracheobronchial_syrinx.png Graphic file (type png)
 
 <use images/tracheobronchial_syrinx.png>
 Package pdftex.def Info: images/tracheobronchial_syrinx.png used on input line 
-75.
+97.
 (pdftex.def)             Requested size: 198.7425pt x 167.85689pt.
- [1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map} <./images/tracheobronchial_
-syrinx.png>] [2] [3]
-<images/simulation.png, id=90, 1079.03125pt x 758.835pt>
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[1
+
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+<images/bifurcations_and_trajectories.png, id=79, 774.895pt x 630.355pt>
+File: images/bifurcations_and_trajectories.png Graphic file (type png)
+
+<use images/bifurcations_and_trajectories.png>
+Package pdftex.def Info: images/bifurcations_and_trajectories.png used on input
+ line 119.
+(pdftex.def)             Requested size: 337.86465pt x 274.84663pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[2 <./images/song.png> <./images/tracheobronchial_syrinx.png>] [3 <./images/bif
+urcations_and_trajectories.png>] [4]
+<images/simulation.png, id=113, 1079.03125pt x 758.835pt>
 File: images/simulation.png Graphic file (type png)
 
 <use images/simulation.png>
-Package pdftex.def Info: images/simulation.png used on input line 271.
+Package pdftex.def Info: images/simulation.png used on input line 306.
 (pdftex.def)             Requested size: 298.11374pt x 209.64711pt.
- [4 <./images/simulation.png>]
-<images/ff_both.png, id=100, 1373.13pt x 548.5293pt>
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<images/ff_both.png, id=117, 1373.13pt x 548.5293pt>
 File: images/ff_both.png Graphic file (type png)
  <use images/ff_both.png>
-Package pdftex.def Info: images/ff_both.png used on input line 294.
+Package pdftex.def Info: images/ff_both.png used on input line 329.
 (pdftex.def)             Requested size: 397.48499pt x 158.78484pt.
 
-<images/passive_phase_plot.png, id=104, 795.6927pt x 656.9343pt>
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[5] <images/passive_phase_plot.png, id=127, 795.6927pt x 656.9343pt>
 File: images/passive_phase_plot.png Graphic file (type png)
 
 <use images/passive_phase_plot.png>
-Package pdftex.def Info: images/passive_phase_plot.png used on input line 315.
+Package pdftex.def Info: images/passive_phase_plot.png used on input line 351.
 (pdftex.def)             Requested size: 298.11374pt x 246.1192pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-LaTeX Font Info:    Try loading font information for U+bbm on input line 322.
+LaTeX Font Info:    Try loading font information for U+bbm on input line 358.
 (/usr/share/texlive/texmf-dist/tex/latex/bbm-macros/ubbm.fd
 File: ubbm.fd 1999/03/15 V 1.2 Font definition for bbm font - TH
-)
-<images/optimization_time.png, id=114, 703.9098pt x 562.2606pt>
+) [6 <./images/simulation.png> <./images/ff_both.png>]
+<images/optimization_time.png, id=144, 703.9098pt x 562.2606pt>
 File: images/optimization_time.png Graphic file (type png)
 
 <use images/optimization_time.png>
-Package pdftex.def Info: images/optimization_time.png used on input line 353.
+Package pdftex.def Info: images/optimization_time.png used on input line 389.
 (pdftex.def)             Requested size: 198.7425pt x 158.74454pt.
- [5 <./images/ff_both.png>]
-<images/cost_and_control.png, id=127, 1365.903pt x 794.97pt>
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<images/cost_and_control.png, id=149, 1365.903pt x 794.97pt>
 File: images/cost_and_control.png Graphic file (type png)
 
 <use images/cost_and_control.png>
-Package pdftex.def Info: images/cost_and_control.png used on input line 371.
+Package pdftex.def Info: images/cost_and_control.png used on input line 407.
 (pdftex.def)             Requested size: 397.48499pt x 231.33598pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[6 <./images/passive_phase_plot.png> <./images/optimization_time.png>]
-<images/spectrogram.png, id=137, 857.8449pt x 633.8079pt>
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [7 <./images/passive_phase_plot.png>]
+<images/spectrogram.png, id=159, 857.8449pt x 633.8079pt>
 File: images/spectrogram.png Graphic file (type png)
 
 <use images/spectrogram.png>
-Package pdftex.def Info: images/spectrogram.png used on input line 397.
+Package pdftex.def Info: images/spectrogram.png used on input line 433.
 (pdftex.def)             Requested size: 298.11374pt x 220.25969pt.
- [7 <./images/cost_and_control.png> <./images/spectrogram.png>] (./project.bbl)
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 449.
- [8]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 449.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [8 <./images/optimization_time.png> <./images/cost_and_control.png>] (./projec
+t.bbl
+[9 <./images/spectrogram.png>])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 511.
+ [10]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 511.
  (./project.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 449.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 449.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 511.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 511.
 Package rerunfilecheck Info: File `project.out' has not changed.
-(rerunfilecheck)             Checksum: 4BDA96A996147413B294971AB5D428B1;706.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 449.
+(rerunfilecheck)             Checksum: C2AEDEAE750455002A241B58FCD4E824;772.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 511.
  ) 
 Here is how much of TeX's memory you used:
- 6502 strings out of 495059
- 93057 string characters out of 3182031
- 187518 words of memory out of 3000000
- 9533 multiletter control sequences out of 15000+200000
+ 6522 strings out of 495059
+ 93472 string characters out of 3182031
+ 187648 words of memory out of 3000000
+ 9545 multiletter control sequences out of 15000+200000
  25418 words of font info for 63 fonts, out of 3000000 for 9000
  14 hyphenation exceptions out of 8191
- 37i,16n,39p,390b,354s stack positions out of 5000i,500n,10000p,200000b,50000s
-{/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc} </home/cheese63/.
-texmf-var/fonts/pk/ljfour/public/bbm/bbm10.600pk></usr/share/texlive/texmf-dist
+ 37i,16n,39p,422b,427s stack positions out of 5000i,500n,10000p,200000b,50000s
+ </home/cheese63/.texmf-var/fonts/pk/ljfour/public/bbm/bbm10.600pk>{/usr/shar
+e/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texlive/texmf-dist
 /fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts
 /type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1
 /public/amsfonts/cm/cmmi5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
@@ -472,10 +518,10 @@ texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texlive
 dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/ty
 pe1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/u
 tmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on project.pdf (8 pages, 787133 bytes).
+Output written on project.pdf (10 pages, 1025147 bytes).
 PDF statistics:
- 219 PDF objects out of 1000 (max. 8388607)
- 178 compressed objects within 2 object streams
- 36 named destinations out of 1000 (max. 500000)
- 116 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 251 PDF objects out of 1000 (max. 8388607)
+ 201 compressed objects within 3 object streams
+ 42 named destinations out of 1000 (max. 500000)
+ 134 words of extra memory for PDF output out of 10000 (max. 10000000)
 
