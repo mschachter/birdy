@@ -99,22 +99,18 @@ class WavFile():
             plt.ylabel('RMS')
             plt.axis('tight')
 
-    def plot_spectrogram(self, ax=None):
+    def plot_spectrogram(self, ax=None, ticks=True):
         if ax is None:
             ax = plt.gca()
         nxticks = 8
         nyticks = 4
         ex = (0.0, self.spectrogram_t.max(), self.spectrogram_f.min(), self.spectrogram_f.max())
         iax = ax.imshow(self.spectrogram, aspect='auto', interpolation='nearest', origin='lower', extent=ex)
-        ax.set_ylabel('Frequency (Hz)')
-        """
-        xtick_spacing = len(self.spectrogram_t) / nxticks
-        ytick_spacing = len(self.spectrogram_f) / nyticks
-        xtick_indices = np.arange(0, len(self.spectrogram_t), xtick_spacing, dtype='int')
-        ytick_indices = np.arange(0, len(self.spectrogram_f), ytick_spacing, dtype='int')
-        ax.set_xticks(xtick_indices, ['%0.1f' % x for x in self.spectrogram_t[xtick_indices]])
-        ax.set_yticks(ytick_indices, ['%d' % x for x in self.spectrogram_f[ytick_indices]])
-        """
+        if not ticks:
+            ax.set_xticks([])
+            ax.set_yticks([])
+        else:
+            ax.set_ylabel('Frequency (Hz)')
 
 
 def play_sound(file_name):
