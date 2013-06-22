@@ -178,3 +178,33 @@ def gaussian_stft(s, sample_rate, window_length, increment, nstd=6, min_freq=0, 
     t = np.arange(0, nwindows, 1.0) * increment
 
     return t,freq,timefreq,rms
+
+
+def spectrogram_gradient(spec):
+
+    nf = spec.shape[0]
+    nt = spec.shape[1]
+
+    dspec = np.zeros([nf, nt, 5])
+
+    x = np.zeros([nf])
+
+    for t in range(1, nt):
+
+        #upper
+        dspec[1:, t, 0] = spec[1:, t] - spec[:-1, t]
+
+        #upper left
+        dspec[1:, t, 1] = spec[1:, t] - spec[:-1, t-1]
+
+        #left
+        dspec[:, t, 2] = spec[:, t] - spec[:, t-1]
+
+        #lower left
+        dspec[:-1, t, 3] = spec[:-1, t] - spec[1:, t-1]
+
+        #lower
+        dspec[1:, t, 4] = spec[:-1, t] - spec[1:, t]
+
+    return dspec
+
