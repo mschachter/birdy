@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 
-from sound import WavFile,log_spectrogram
+from tools.sound import WavFile,log_spectrogram
 
 
 class PCADiscretizer(object):

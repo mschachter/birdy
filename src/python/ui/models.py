@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from oscillators import NormalOscillator, PhysicalOscillator
-from sound import WavFile
+from tools.sound import WavFile
 from ui.mpl_figure import MplFigure
 
 
