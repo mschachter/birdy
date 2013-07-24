@@ -7,7 +7,7 @@ from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
 
 from tools.signal import gaussian_stft
-from tools.sound import log_spectrogram,WavFile
+from tools.sound import spectrogram,WavFile,plot_spectrogram
 
 from oscillators import NormalOscillator
 
@@ -109,46 +109,57 @@ class Motogram(object):
             #normalize the filtered spectrogram
             spec_filt[:, k] = sfilt / (spi*ssi)
 
-        return waveform,spec_filt
+        return waveform,spec_t,spec_f,spec_filt
 
     def plot(self):
 
-        waveform,sim_spec = self.simulate()
+        waveform,spec_t,spec_f,spec = self.simulate()
 
-        nsp = 5
-        if hasattr(self, 'hedi_spectrogram'):
+        nsp = 4
+        if hasattr(self, 'wav_file'):
             nsp += 1
 
+        plt.figure()
+        plt.subplots_adjust(bottom=0.05, right=0.99, top=0.99, left=0.08, wspace=0.0, hspace=0.25)
         plt.subplot(nsp, 1, 1)
-        plt.plot(waveform, 'k-')
+        wt = np.arange(len(waveform))*(1.0 / self.waveform_sample_rate)
+        plt.plot(wt, waveform, 'k-')
+        plt.legend(['x(t)'])
         plt.axis('tight')
 
         plt.subplot(nsp, 1, 2)
-        plt.imshow(sim_spec, interpolation='nearest', aspect='auto')
+        plt.title('Model Spectrogram')
+        plot_spectrogram(spec_t, spec_f, spec, fmin=0.0, fmax=8000.0)
         plt.axis('tight')
 
         plt.subplot(nsp, 1, 3)
-        plt.plot(self.alpha, 'r-')
+        mt = np.arange(len(self.alpha))*(1.0 / self.sample_rate)
+        plt.plot(mt, self.alpha, 'r-')
         #plt.plot(self.beta, 'b-')
-        #plt.legend(['alpha', 'beta'])
+        plt.legend(['alpha'])
         plt.axis('tight')
 
         plt.subplot(nsp, 1, 4)
-        plt.plot(self.mu, 'k-')
-        plt.legend(['mu'])
+        plt.plot(mt, self.sigma1, 'g-')
+        plt.plot(mt, self.sigma2, 'b-')
+        plt.plot(mt, self.mu, 'k-', linewidth=2)
+        plt.legend(['sigma1', 'sigma2', 'mu'])
         plt.axis('tight')
 
-        plt.subplot(nsp, 1, 5)
-        plt.plot(self.sigma1, 'g-')
-        plt.plot(self.sigma2, 'k-')
-        plt.legend(['sigma1', 'sigma2'])
-        plt.axis('tight')
+        if hasattr(self, 'wav_file'):
+            plt.subplot(nsp, 1, 5)
+            print 'start_time=%f, end_time=%f' % (self.start_time, self.end_time)
+            si = int(self.start_time * self.sample_rate)
+            ei = int(self.end_time * self.sample_rate)
+            plot_spectrogram(self.wav_file.spectrogram_t[si:ei], self.wav_file.spectrogram_f, self.wav_file.spectrogram[:, si:ei], fmin=0.0, fmax=8000.0)
+            plt.title('Actual Spectrogram')
 
-        if hasattr(self, 'hedi_spectrogram'):
-            plt.subplot(nsp, 1, 6)
-            plt.imshow(self.hedi_spectrogram, interpolation='nearest', aspect='auto')
+            """
+            plt.subplot(nsp, 1, 5)
+            plot_spectrogram(spec_t, self.hedi_spectrogram_freq, self.hedi_spectrogram, fmin=0.0, fmax=8000.0)
             plt.axis('tight')
-
+            plt.title('Hedi Spectrogram')
+            """
 
 
 def motograms_from_file(file_name, wav_file_dir):
@@ -167,7 +178,7 @@ def motograms_from_file(file_name, wav_file_dir):
         intercept = stim_group.attrs['intercept']
         slope = stim_group.attrs['slope']
 
-        wf = WavFile(wav_file_name)
+        wf = WavFile(wav_file_name, log_spectrogram=False)
         wf.analyze(min_freq=300, max_freq=8000, spec_sample_rate=1000.0, freq_spacing=125.0)
 
         for split_name,split_group in stim_group.iteritems():
@@ -191,8 +202,8 @@ def motograms_from_file(file_name, wav_file_dir):
             motogram.fitvals = fitvals
             motogram.hedi_spectrogram = np.array(split_group['spectrogram'])
             motogram.hedi_spectrogram_freq = np.array(split_group['frequencies'])
-            motogram.start_time = split_group.attrs['start_time']
-            motogram.end_time = split_group.attrs['end_time']
+            motogram.start_time = split_group.attrs['start_time'] / 1000.0
+            motogram.end_time = split_group.attrs['end_time'] / 1000.0
             motogram.md5 = md5
             motogram.wav_file = wf
 
