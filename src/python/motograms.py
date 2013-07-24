@@ -206,6 +206,7 @@ def motograms_from_file(file_name, wav_file_dir):
             motogram.end_time = split_group.attrs['end_time'] / 1000.0
             motogram.md5 = md5
             motogram.wav_file = wf
+            motogram.wav_file_name = wav_file_name
 
             motograms.append(motogram)
 
